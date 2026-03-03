@@ -8,11 +8,11 @@ export default function HomePage() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-3xl space-y-6">
           <h1 className="text-5xl font-bold tracking-tight">
-            Generate a Logo in Seconds
+            Brand Assets in Seconds
           </h1>
           <p className="text-xl text-muted-foreground">
-            Enter your company name, pick from 30 unique variations, and download
-            production-ready SVG files. Free, no sign-up required.
+            Enter your company name, pick from 30 unique logo variations, and download
+            production-ready SVG files. Favicons, doc headers, and more coming soon. Free, no sign-up required.
           </p>
           <div className="flex justify-center gap-4">
             <Button asChild size="lg">
@@ -85,9 +85,9 @@ export default function HomePage() {
       {/* CTA */}
       <section className="py-16 px-4 bg-muted/50">
         <div className="container mx-auto text-center space-y-4">
-          <h2 className="text-3xl font-bold">Ready to Create Your Logo?</h2>
+          <h2 className="text-3xl font-bold">Ready to Build Your Brand?</h2>
           <p className="text-muted-foreground">
-            It takes less than 30 seconds. No sign-up, no payment.
+            Start with a logo in under 30 seconds. No sign-up, no payment.
           </p>
           <Button asChild size="lg">
             <Link to="/create">Get Started</Link>
