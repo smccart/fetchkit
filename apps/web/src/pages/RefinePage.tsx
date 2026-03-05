@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LogoGrid } from '@/components/LogoGrid';
 import { LogoCanvas } from '@/components/LogoCanvas';
 import { IconPicker } from '@/components/IconPicker';
@@ -9,11 +10,13 @@ import { ColorEditor } from '@/components/ColorEditor';
 import { useInfiniteLogos } from '@/hooks/useInfiniteLogos';
 import type { FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
 
+const DEFAULT_NAME = 'FetchKit';
+
 export default function RefinePage() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as { companyName?: string } | null;
-  const companyName = state?.companyName ?? '';
+  const [companyName, setCompanyName] = useState(DEFAULT_NAME);
+  const debouncedRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const initialRef = useRef(true);
 
   const {
     variations,
@@ -29,13 +32,24 @@ export default function RefinePage() {
     updateColors,
   } = useInfiniteLogos(companyName);
 
+  // Generate on mount immediately, then debounce subsequent name changes
   useEffect(() => {
-    if (!companyName) {
-      navigate('/create');
+    if (!companyName.trim()) return;
+
+    if (initialRef.current) {
+      initialRef.current = false;
+      generateInitial();
       return;
     }
-    generateInitial();
-  }, [companyName, navigate, generateInitial]);
+
+    clearTimeout(debouncedRef.current);
+    debouncedRef.current = setTimeout(() => {
+      generateInitial();
+    }, 500);
+
+    return () => clearTimeout(debouncedRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyName]);
 
   const handleExport = () => {
     if (selected) {
@@ -47,16 +61,26 @@ export default function RefinePage() {
     <div className="flex-1 container mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Choose Your Logo</h1>
+          <h1 className="text-2xl font-bold">Create Your Logo</h1>
           <p className="text-sm text-muted-foreground">
             {isInitialLoading
               ? 'Searching for icons and generating logos...'
               : 'Click a logo to select it, then customize it below. Scroll for more variations.'}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/create')}>
-          Start Over
-        </Button>
+      </div>
+
+      {/* Controls */}
+      <div className="flex flex-wrap items-end gap-4 mb-8">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">Company Name</label>
+          <Input
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Enter your company name..."
+            className="w-64"
+          />
+        </div>
       </div>
 
       {/* Logo Grid with Infinite Scroll */}

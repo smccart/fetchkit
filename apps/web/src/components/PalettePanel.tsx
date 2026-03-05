@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ColorHarmony, SemanticPalette, WcagLevel } from '@fetchkit/brand';
 
@@ -8,8 +7,7 @@ interface PalettePanelProps {
   onSeedColorChange: (hex: string) => void;
   harmony: ColorHarmony;
   onHarmonyChange: (h: ColorHarmony) => void;
-  onGenerate: () => void;
-  palette: SemanticPalette | null;
+  palette: SemanticPalette;
 }
 
 const HARMONIES: { value: ColorHarmony; label: string }[] = [
@@ -39,7 +37,6 @@ export function PalettePanel({
   onSeedColorChange,
   harmony,
   onHarmonyChange,
-  onGenerate,
   palette,
 }: PalettePanelProps) {
   const [darkMode, setDarkMode] = useState(false);
@@ -84,12 +81,10 @@ export function PalettePanel({
           </div>
         </div>
 
-        <Button onClick={onGenerate}>Generate Palette</Button>
       </div>
 
       {/* Palette Display */}
-      {palette && (
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{palette.name}</h3>
             <button
@@ -141,7 +136,6 @@ export function PalettePanel({
             ))}
           </div>
         </div>
-      )}
     </div>
   );
 }

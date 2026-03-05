@@ -7,9 +7,8 @@ interface UsePaletteGeneratorReturn {
   setSeedColor: (hex: string) => void;
   harmony: ColorHarmony;
   setHarmony: (h: ColorHarmony) => void;
-  palette: SemanticPalette | null;
-  exportData: PaletteExport | null;
-  generate: () => void;
+  palette: SemanticPalette;
+  exportData: PaletteExport;
   downloadZip: () => Promise<void>;
 }
 
@@ -18,17 +17,16 @@ export function usePaletteGenerator(
 ): UsePaletteGeneratorReturn {
   const [seedColor, setSeedColor] = useState(initialSeed);
   const [harmony, setHarmony] = useState<ColorHarmony>('analogous');
-  const [palette, setPalette] = useState<SemanticPalette | null>(null);
 
-  const exportData = useMemo(() => {
-    if (!palette) return null;
-    return bundlePaletteExport(palette);
-  }, [palette]);
+  const palette = useMemo(
+    () => generateSemanticPalette(seedColor, harmony),
+    [seedColor, harmony],
+  );
 
-  const generate = useCallback(() => {
-    const result = generateSemanticPalette(seedColor, harmony);
-    setPalette(result);
-  }, [seedColor, harmony]);
+  const exportData = useMemo(
+    () => bundlePaletteExport(palette),
+    [palette],
+  );
 
   const downloadZip = useCallback(async () => {
     if (!exportData) return;
@@ -62,7 +60,6 @@ export function usePaletteGenerator(
     setHarmony,
     palette,
     exportData,
-    generate,
     downloadZip,
   };
 }

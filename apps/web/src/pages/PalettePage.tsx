@@ -18,19 +18,18 @@ export default function PalettePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="generate">
+      <Tabs defaultValue="palette">
         <TabsList className="mb-6">
-          <TabsTrigger value="generate">Generate</TabsTrigger>
+          <TabsTrigger value="palette">Palette</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="generate">
+        <TabsContent value="palette">
           <PalettePanel
             seedColor={paletteGen.seedColor}
             onSeedColorChange={paletteGen.setSeedColor}
             harmony={paletteGen.harmony}
             onHarmonyChange={paletteGen.setHarmony}
-            onGenerate={paletteGen.generate}
             palette={paletteGen.palette}
           />
         </TabsContent>

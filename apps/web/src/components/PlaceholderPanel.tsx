@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { PlaceholderCard } from '@/components/PlaceholderCard';
 import type { PlaceholderBundle, PlaceholderCategory, PlaceholderImage } from '@fetchkit/brand';
 
 interface PlaceholderPanelProps {
   bundle: PlaceholderBundle | null;
   isGenerating: boolean;
+  color: string;
+  onColorChange: (hex: string) => void;
   selectedCategories: PlaceholderCategory[];
   onSelectedCategoriesChange: (cats: PlaceholderCategory[]) => void;
-  onGenerate: (colors: string[]) => void;
   onDownloadAll: () => Promise<void>;
   onDownloadSingle: (image: PlaceholderImage) => void;
 }
@@ -38,14 +38,13 @@ const SCREENSHOT_CATEGORIES: { value: PlaceholderCategory; label: string }[] = [
 export function PlaceholderPanel({
   bundle,
   isGenerating,
+  color,
+  onColorChange,
   selectedCategories,
   onSelectedCategoriesChange,
-  onGenerate,
   onDownloadAll,
   onDownloadSingle,
 }: PlaceholderPanelProps) {
-  const [colorInput, setColorInput] = useState('#6366f1');
-
   function toggleCategory(cat: PlaceholderCategory) {
     if (selectedCategories.includes(cat)) {
       onSelectedCategoriesChange(selectedCategories.filter((c) => c !== cat));
@@ -63,13 +62,13 @@ export function PlaceholderPanel({
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={colorInput}
-              onChange={(e) => setColorInput(e.target.value)}
+              value={color}
+              onChange={(e) => onColorChange(e.target.value)}
               className="h-9 w-12 rounded border cursor-pointer"
             />
             <Input
-              value={colorInput}
-              onChange={(e) => setColorInput(e.target.value)}
+              value={color}
+              onChange={(e) => onColorChange(e.target.value)}
               className="w-28 font-mono text-sm"
             />
           </div>
@@ -109,21 +108,19 @@ export function PlaceholderPanel({
             ))}
           </div>
         </div>
-
-        <Button
-          onClick={() => onGenerate([colorInput])}
-          disabled={isGenerating || selectedCategories.length === 0}
-        >
-          {isGenerating ? 'Generating...' : 'Generate'}
-        </Button>
       </div>
 
       {/* Results */}
+      {isGenerating && !bundle && (
+        <p className="text-sm text-muted-foreground">Generating placeholders...</p>
+      )}
+
       {bundle && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {bundle.images.length} placeholder{bundle.images.length !== 1 ? 's' : ''} generated
+              {isGenerating && ' — updating...'}
             </p>
             <Button variant="outline" onClick={onDownloadAll}>
               Download All as ZIP

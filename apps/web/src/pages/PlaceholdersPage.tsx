@@ -16,9 +16,10 @@ export default function PlaceholdersPage() {
       <PlaceholderPanel
         bundle={placeholders.bundle}
         isGenerating={placeholders.isGenerating}
+        color={placeholders.color}
+        onColorChange={placeholders.setColor}
         selectedCategories={placeholders.selectedCategories}
         onSelectedCategoriesChange={placeholders.setSelectedCategories}
-        onGenerate={placeholders.generate}
         onDownloadAll={placeholders.downloadAll}
         onDownloadSingle={placeholders.downloadSingle}
       />

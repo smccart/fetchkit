@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { PlaceholderBundle, PlaceholderCategory, PlaceholderImage } from '@fetchkit/brand';
 import { generatePlaceholderBundle } from '@fetchkit/brand';
 
@@ -10,27 +10,38 @@ const ALL_CATEGORIES: PlaceholderCategory[] = [
 interface UsePlaceholdersReturn {
   bundle: PlaceholderBundle | null;
   isGenerating: boolean;
+  color: string;
+  setColor: (hex: string) => void;
   selectedCategories: PlaceholderCategory[];
   setSelectedCategories: (cats: PlaceholderCategory[]) => void;
-  generate: (colors: string[]) => void;
   downloadAll: () => Promise<void>;
   downloadSingle: (image: PlaceholderImage) => void;
 }
 
-export function usePlaceholders(): UsePlaceholdersReturn {
+export function usePlaceholders(initialColor: string = '#6366f1'): UsePlaceholdersReturn {
   const [bundle, setBundle] = useState<PlaceholderBundle | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [color, setColor] = useState(initialColor);
   const [selectedCategories, setSelectedCategories] = useState<PlaceholderCategory[]>(ALL_CATEGORIES);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const generate = useCallback((colors: string[]) => {
-    setIsGenerating(true);
-    // Generation is synchronous but we use setTimeout to avoid blocking UI
-    setTimeout(() => {
-      const result = generatePlaceholderBundle(colors, selectedCategories);
-      setBundle(result);
-      setIsGenerating(false);
-    }, 0);
-  }, [selectedCategories]);
+  // Auto-generate whenever color or categories change (debounced)
+  useEffect(() => {
+    if (selectedCategories.length === 0) return;
+
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setIsGenerating(true);
+      // Use setTimeout(0) to avoid blocking UI during synchronous generation
+      setTimeout(() => {
+        const result = generatePlaceholderBundle([color], selectedCategories);
+        setBundle(result);
+        setIsGenerating(false);
+      }, 0);
+    }, 150);
+
+    return () => clearTimeout(timerRef.current);
+  }, [color, selectedCategories]);
 
   const downloadAll = useCallback(async () => {
     if (!bundle) return;
@@ -64,9 +75,10 @@ export function usePlaceholders(): UsePlaceholdersReturn {
   return {
     bundle,
     isGenerating,
+    color,
+    setColor,
     selectedCategories,
     setSelectedCategories,
-    generate,
     downloadAll,
     downloadSingle,
   };

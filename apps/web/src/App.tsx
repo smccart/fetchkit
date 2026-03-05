@@ -1,10 +1,9 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 const HomePage = lazy(() => import('@/pages/HomePage'));
-const CreatePage = lazy(() => import('@/pages/CreatePage'));
 const RefinePage = lazy(() => import('@/pages/RefinePage'));
 const ExportPage = lazy(() => import('@/pages/ExportPage'));
 const DocsPage = lazy(() => import('@/pages/DocsPage'));
@@ -28,8 +27,8 @@ export default function App() {
         >
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/create" element={<CreatePage />} />
-            <Route path="/create/results" element={<RefinePage />} />
+            <Route path="/create" element={<RefinePage />} />
+            <Route path="/create/results" element={<Navigate to="/create" replace />} />
             <Route path="/create/export" element={<ExportPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/legal" element={<LegalPage />} />
