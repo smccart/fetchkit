@@ -111,15 +111,15 @@ The core service stays free forever. Lightweight mechanisms for sustainability:
 
 ## Milestones
 
-### Phase 1: Monorepo + Brand Service (now)
+### Phase 1: Monorepo + Brand Service
 - [x] Convert to Turborepo monorepo with `@fetchkit/brand` package
+- [x] Deploy web app to fetchkit.dev
 - [ ] Complete remaining brand features (letterhead, app icon, brand guidelines, email signature)
-- [ ] Deploy web app to fetchkit.dev
 
 ### Phase 2: API + MCP Server
-- [ ] Add thin server layer (Hono on Cloudflare Workers)
-- [ ] Publish OpenAPI spec
-- [ ] Build MCP server package for native agent integration
+- [x] Add REST API (Vercel serverless functions — 12 endpoints)
+- [x] Publish OpenAPI spec (`/api/openapi.json`)
+- [x] Build MCP server package (`@fetchkit/mcp`) for native agent integration
 - [ ] Create agent-integration examples (Claude tool-use, GPT function-calling)
 
 ### Phase 3: Expand Services

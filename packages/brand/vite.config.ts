@@ -13,16 +13,25 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      formats: ['es'],
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       external: (id) =>
         !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('@/'),
-      output: {
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        entryFileNames: '[name].js',
-      },
+      output: [
+        {
+          format: 'es',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          entryFileNames: '[name].js',
+        },
+        {
+          format: 'cjs',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          entryFileNames: '[name].cjs',
+        },
+      ],
     },
   },
 })

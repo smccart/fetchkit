@@ -2,12 +2,16 @@
   "name": "fetchkit",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean"
+  },
+  "dependencies": {
+    "@fetchkit/brand": "workspace:*"
   },
   "devDependencies": {
     "turbo": "^2.5.0"

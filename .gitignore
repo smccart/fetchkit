@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .vercel
 .turbo
+
+# Build artifacts
+api/brand.js
+api/brand.mjs

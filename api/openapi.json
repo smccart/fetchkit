@@ -1,0 +1,397 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FetchKit Brand API",
+    "version": "0.1.0",
+    "description": "Free brand identity generation API for developers and AI agents. Generate logos, color palettes, design tokens, favicons, and placeholder images.",
+    "license": { "name": "MIT", "url": "https://github.com/fetchkit/fetchkit/blob/main/LICENSE" }
+  },
+  "servers": [
+    { "url": "https://fetchkit.dev/api", "description": "Production" }
+  ],
+  "paths": {
+    "/brand/generate": {
+      "get": {
+        "operationId": "generateLogos",
+        "summary": "Generate logo variations for a company name",
+        "parameters": [
+          { "name": "name", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Company or project name" },
+          { "name": "count", "in": "query", "schema": { "type": "integer", "default": 30, "maximum": 30 }, "description": "Number of variations to generate" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logo variations",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GenerateResponse" } } }
+          }
+        }
+      }
+    },
+    "/brand/regenerate": {
+      "post": {
+        "operationId": "regenerateLogos",
+        "summary": "Regenerate logos with specific overrides locked in",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RegenerateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Regenerated logo variations",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GenerateResponse" } } }
+          }
+        }
+      }
+    },
+    "/brand/export-svg": {
+      "post": {
+        "operationId": "exportSvg",
+        "summary": "Build production-ready SVG with text converted to paths",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ExportSvgRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Export-ready SVG",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ExportSvgResponse" } } }
+          }
+        }
+      }
+    },
+    "/brand/favicon": {
+      "get": {
+        "operationId": "generateFavicon",
+        "summary": "Generate favicon SVG, HTML snippet, and web manifest",
+        "description": "Returns SVG favicon only. PNG/ICO generation requires browser Canvas API and is not available server-side.",
+        "parameters": [
+          { "name": "iconId", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Iconify icon ID (e.g. mdi:rocket-launch)" },
+          { "name": "iconColor", "in": "query", "schema": { "type": "string", "default": "#000000" }, "description": "Hex color for the icon" },
+          { "name": "name", "in": "query", "schema": { "type": "string", "default": "App" }, "description": "Company name for the manifest" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Favicon bundle",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FaviconResponse" } } }
+          }
+        }
+      }
+    },
+    "/brand/design-tokens": {
+      "post": {
+        "operationId": "generateDesignTokens",
+        "summary": "Generate CSS variables, Tailwind config, and JSON design tokens",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DesignTokensRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Design tokens in multiple formats",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DesignTokensResponse" } } }
+          }
+        }
+      }
+    },
+    "/brand/icons/search": {
+      "get": {
+        "operationId": "searchIcons",
+        "summary": "Search the Iconify icon database",
+        "parameters": [
+          { "name": "query", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 30, "maximum": 50 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching icons",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "icons": { "type": "array", "items": { "$ref": "#/components/schemas/IconConfig" } } } } } }
+          }
+        }
+      }
+    },
+    "/brand/icons/{id}": {
+      "get": {
+        "operationId": "getIcon",
+        "summary": "Fetch a single icon SVG by Iconify ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Iconify icon ID (e.g. mdi:rocket-launch)" },
+          { "name": "color", "in": "query", "schema": { "type": "string" }, "description": "Hex color to apply to the icon" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Icon SVG",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "svg": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
+    "/brand/palette/generate": {
+      "post": {
+        "operationId": "generatePalette",
+        "summary": "Generate a semantic color palette from a seed color",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaletteGenerateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Semantic palette with export formats",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaletteExport" } } }
+          }
+        }
+      }
+    },
+    "/brand/palette/from-name": {
+      "get": {
+        "operationId": "paletteFromName",
+        "summary": "Generate a deterministic palette from a brand name",
+        "parameters": [
+          { "name": "name", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Brand or company name" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Semantic palette with export formats",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaletteExport" } } }
+          }
+        }
+      }
+    },
+    "/brand/placeholder": {
+      "post": {
+        "operationId": "generatePlaceholder",
+        "summary": "Generate SVG placeholder images for UI mockups",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlaceholderRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Placeholder image",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "image": { "$ref": "#/components/schemas/PlaceholderImage" } } } } }
+          }
+        }
+      }
+    },
+    "/brand/meta/og-tags": {
+      "get": {
+        "operationId": "getOgTags",
+        "summary": "Get OG image meta tags HTML snippet",
+        "responses": {
+          "200": {
+            "description": "OG meta tags",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "html": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
+    "/brand/meta/manifest": {
+      "get": {
+        "operationId": "getManifest",
+        "summary": "Generate a web app manifest",
+        "parameters": [
+          { "name": "name", "in": "query", "schema": { "type": "string", "default": "App" }, "description": "App name" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Web manifest JSON",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FontConfig": {
+        "type": "object",
+        "required": ["family", "weight", "category"],
+        "properties": {
+          "family": { "type": "string" },
+          "weight": { "type": "integer" },
+          "category": { "type": "string", "enum": ["serif", "sans-serif", "display", "handwriting", "monospace"] }
+        }
+      },
+      "IconConfig": {
+        "type": "object",
+        "required": ["id", "name", "svg"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "svg": { "type": "string" }
+        }
+      },
+      "ColorPalette": {
+        "type": "object",
+        "required": ["name", "iconColor", "letterColors"],
+        "properties": {
+          "name": { "type": "string" },
+          "iconColor": { "type": "string" },
+          "letterColors": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "LogoConfig": {
+        "type": "object",
+        "required": ["companyName", "font", "icon", "colors"],
+        "properties": {
+          "companyName": { "type": "string" },
+          "font": { "$ref": "#/components/schemas/FontConfig" },
+          "icon": { "$ref": "#/components/schemas/IconConfig" },
+          "colors": { "$ref": "#/components/schemas/ColorPalette" }
+        }
+      },
+      "LogoVariation": {
+        "type": "object",
+        "required": ["id", "config"],
+        "properties": {
+          "id": { "type": "string" },
+          "config": { "$ref": "#/components/schemas/LogoConfig" }
+        }
+      },
+      "GenerateResponse": {
+        "type": "object",
+        "properties": {
+          "variations": { "type": "array", "items": { "$ref": "#/components/schemas/LogoVariation" } },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "companyName": { "type": "string" },
+              "count": { "type": "integer" },
+              "generatedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      },
+      "RegenerateRequest": {
+        "type": "object",
+        "required": ["companyName"],
+        "properties": {
+          "companyName": { "type": "string" },
+          "overrides": {
+            "type": "object",
+            "properties": {
+              "icon": { "$ref": "#/components/schemas/IconConfig" },
+              "font": { "$ref": "#/components/schemas/FontConfig" },
+              "palette": { "$ref": "#/components/schemas/ColorPalette" }
+            }
+          },
+          "count": { "type": "integer", "default": 30, "maximum": 30 }
+        }
+      },
+      "ExportSvgRequest": {
+        "type": "object",
+        "required": ["config"],
+        "properties": {
+          "config": { "$ref": "#/components/schemas/LogoConfig" },
+          "layout": { "type": "string", "enum": ["horizontal", "vertical"], "default": "horizontal" },
+          "mode": { "type": "string", "enum": ["light", "dark"], "default": "light" }
+        }
+      },
+      "ExportSvgResponse": {
+        "type": "object",
+        "properties": {
+          "svg": { "type": "string" },
+          "layout": { "type": "string" },
+          "mode": { "type": "string" }
+        }
+      },
+      "FaviconResponse": {
+        "type": "object",
+        "properties": {
+          "svg": { "type": "string" },
+          "htmlSnippet": { "type": "string" },
+          "manifest": { "type": "object" }
+        }
+      },
+      "DesignTokensRequest": {
+        "type": "object",
+        "required": ["colors", "font"],
+        "properties": {
+          "colors": { "$ref": "#/components/schemas/ColorPalette" },
+          "font": { "$ref": "#/components/schemas/FontConfig" }
+        }
+      },
+      "DesignTokensResponse": {
+        "type": "object",
+        "properties": {
+          "css": {
+            "type": "object",
+            "properties": {
+              "variables": { "type": "string" },
+              "fontCss": { "type": "string" }
+            }
+          },
+          "tailwind": {
+            "type": "object",
+            "properties": {
+              "colors": { "type": "string" },
+              "font": { "type": "string" }
+            }
+          },
+          "json": {
+            "type": "object",
+            "properties": {
+              "colorTokens": { "type": "string" }
+            }
+          },
+          "html": {
+            "type": "object",
+            "properties": {
+              "fontLinkTag": { "type": "string" }
+            }
+          }
+        }
+      },
+      "PaletteGenerateRequest": {
+        "type": "object",
+        "required": ["seedColor"],
+        "properties": {
+          "seedColor": { "type": "string", "description": "Hex color (e.g. #6366f1)" },
+          "harmony": { "type": "string", "enum": ["complementary", "analogous", "triadic", "split-complementary", "monochromatic"], "default": "analogous" }
+        }
+      },
+      "PaletteExport": {
+        "type": "object",
+        "properties": {
+          "cssVariables": { "type": "string" },
+          "tailwindConfig": { "type": "string" },
+          "tokensJson": { "type": "string" },
+          "palette": { "$ref": "#/components/schemas/SemanticPalette" }
+        }
+      },
+      "SemanticPalette": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "harmony": { "type": "string" },
+          "seedColor": { "type": "string" },
+          "colors": { "type": "object" },
+          "light": { "type": "object" },
+          "dark": { "type": "object" },
+          "metadata": { "type": "object" }
+        }
+      },
+      "PlaceholderRequest": {
+        "type": "object",
+        "required": ["category"],
+        "properties": {
+          "category": { "type": "string", "enum": ["hero", "avatar", "product", "chart", "team", "background", "pattern", "icon-grid"] },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" },
+          "colors": { "type": "array", "items": { "type": "string" } },
+          "label": { "type": "string" }
+        }
+      },
+      "PlaceholderImage": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string" },
+          "svg": { "type": "string" },
+          "dataUri": { "type": "string" },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" },
+          "metadata": { "type": "object" }
+        }
+      }
+    }
+  }
+}
