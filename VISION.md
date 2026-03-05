@@ -111,27 +111,48 @@ The core service stays free forever. Lightweight mechanisms for sustainability:
 
 ## Milestones
 
-### Phase 1: Monorepo + Brand Service
+### Phase 1: Monorepo + Brand Service — ~90% Complete
 - [x] Convert to Turborepo monorepo with `@fetchkit/brand` package
 - [x] Deploy web app to fetchkit.dev
-- [ ] Complete remaining brand features (letterhead, app icon, brand guidelines, email signature)
+- [x] Logo generation (30+ variations, infinite scroll, icon/font/color customization)
+- [x] SVG export with text-to-paths (production-ready, no font dependencies)
+- [x] Favicon generation (SVG, ICO, PNG sizes, manifest.json, HTML snippet)
+- [x] Social cards (OG images light/dark, meta tags)
+- [x] Color system (24 palette templates, 3 assignment modes, semantic palettes, WCAG contrast)
+- [x] Typography (38 curated fonts, CSS/Tailwind/JSON exports)
+- [x] Placeholder images (8 categories: hero, avatar, product, chart, team, background, pattern, icon-grid)
+- [x] Design tokens (CSS variables, Tailwind config, JSON tokens)
+- [x] Gradient support (per-word linear gradients, icon gradients)
+- [x] Dark mode color variants
+- [ ] Letterhead generation
+- [ ] App icon generation
+- [ ] Brand guidelines document
+- [ ] Email signature template
 
-### Phase 2: API + MCP Server
+### Phase 2: API + MCP Server — ~85% Complete
 - [x] Add REST API (Vercel serverless functions — 12 endpoints)
 - [x] Publish OpenAPI spec (`/api/openapi.json`)
-- [x] Build MCP server package (`@fetchkit/mcp`) for native agent integration
+- [x] Build MCP server package (`@fetchkit/mcp`) — 7 tools, stdio transport
+- [ ] Update `/docs` page with real API documentation (currently says "Coming Soon" despite API being live)
 - [ ] Create agent-integration examples (Claude tool-use, GPT function-calling)
 
-### Phase 3: Expand Services
+### Phase 3: Expand Services — Not Started (placeholder pages exist)
 - [ ] `@fetchkit/legal` — privacy policies, terms of service, cookie consent
 - [ ] `@fetchkit/seo` — meta tags, sitemap, robots.txt, structured data
 - [ ] `@fetchkit/seed` — realistic domain-appropriate sample data
 
-### Phase 4: Grow the Ecosystem
+### Phase 4: Grow the Ecosystem — Not Started
 - [ ] GitHub Action: auto-generate assets on repo creation
 - [ ] VS Code extension: generate assets from command palette
 - [ ] Community templates and contributions
 - [ ] CLI tool for local dev workflows
+
+## Next Steps (Recommended Order)
+
+1. **Update `/docs` page with API & MCP documentation** — The API is live but the docs page says "Coming Soon." This is the highest-impact, lowest-effort win. Document all 12 REST endpoints and 7 MCP tools with examples.
+2. **Add agent integration examples** — Claude tool-use and GPT function-calling snippets showing how to call the API and use the MCP server. This completes Phase 2.
+3. **Remaining Phase 1 items** — Letterhead, app icon, brand guidelines, and email signature are nice-to-haves that can be added incrementally.
+4. **Phase 3: `@fetchkit/legal`** — Most universally needed new service. Privacy policies, terms of service, and cookie consent are required by virtually every web project.
 
 ## The Pitch (one line)
 

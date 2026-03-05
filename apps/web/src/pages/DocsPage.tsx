@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import ApiSection from '@/components/docs/ApiSection';
+import McpSection from '@/components/docs/McpSection';
 
 const TOC = [
   { id: 'overview', label: 'Overview' },
   { id: 'brand-service', label: 'Brand Service' },
   { id: 'architecture', label: 'Architecture' },
-  { id: 'api', label: 'API' },
+  { id: 'api', label: 'REST API' },
+  { id: 'mcp', label: 'MCP Server' },
   { id: 'faq', label: 'FAQ' },
 ];
 
@@ -60,8 +63,8 @@ export default function DocsPage() {
           <p className="text-muted-foreground">
             FetchKit is a free, open-source platform that provides production-ready assets
             and configurations for new projects. It's designed to be used by both developers
-            and AI agents — every service is available through a web UI and will soon be
-            accessible via REST API and MCP server.
+            and AI agents — every service is available through a web UI,
+            REST API, and MCP server.
           </p>
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">Who it's for</h3>
@@ -162,9 +165,11 @@ export default function DocsPage() {
 ├── apps/
 │   └── web/              → React UI (this site)
 ├── packages/
-│   └── brand/            → @fetchkit/brand (logo, favicon, tokens)
-│   └── tsconfig/         → shared TypeScript config
+│   ├── brand/            → @fetchkit/brand (logo, favicon, tokens)
+│   ├── mcp/              → @fetchkit/mcp (MCP server, stdio)
+│   ├── tsconfig/         → shared TypeScript config
 │   └── eslint-config/    → shared ESLint config
+├── api/                  → Vercel serverless functions (REST API)
 ├── turbo.json
 └── pnpm-workspace.yaml`}</pre>
             </div>
@@ -181,41 +186,14 @@ export default function DocsPage() {
         </div>
       </Section>
 
-      {/* API */}
-      <Section id="api" title="API">
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">
-            Coming Soon
-          </div>
-          <p className="text-muted-foreground">
-            FetchKit will offer two programmatic interfaces so AI agents and scripts can
-            request assets without using the web UI.
-          </p>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">REST API</h3>
-            <p className="text-muted-foreground">
-              Lightweight endpoints hosted on Cloudflare Workers. Example:
-            </p>
-            <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground">
-              <pre>{`POST /api/brand/generate
-{
-  "name": "Acme Corp",
-  "icon": "mdi:rocket",
-  "palette": "sunset"
-}
+      {/* REST API */}
+      <Section id="api" title="REST API">
+        <ApiSection />
+      </Section>
 
-→ Returns SVG logos, favicon bundle, design tokens`}</pre>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">MCP Server</h3>
-            <p className="text-muted-foreground">
-              A Model Context Protocol server for native integration with Claude and other
-              AI assistants. Agents will be able to call FetchKit tools directly within
-              their workflow.
-            </p>
-          </div>
-        </div>
+      {/* MCP Server */}
+      <Section id="mcp" title="MCP Server" muted>
+        <McpSection />
       </Section>
 
       {/* FAQ */}
@@ -236,15 +214,15 @@ export default function DocsPage() {
             },
             {
               q: 'Is any data sent to a server?',
-              a: 'No. Everything runs client-side in your browser. The only external requests are to Google Fonts (for font loading) and Iconify (for icon data). Your project data never leaves your machine.',
+              a: 'The web UI runs entirely client-side — the only external requests are to Google Fonts and Iconify. If you use the REST API, requests are processed by Vercel serverless functions but no data is stored.',
             },
             {
               q: 'Can I self-host FetchKit?',
               a: 'Yes. FetchKit is MIT licensed and fully open source. Clone the repo, install dependencies, and deploy wherever you like.',
             },
             {
-              q: 'When will the API be available?',
-              a: 'The REST API and MCP server are actively being developed. Follow the project on GitHub for updates.',
+              q: 'How do I use the API?',
+              a: 'The REST API is free and requires no authentication. Send requests to https://fetchkit.dev/api/brand/. See the REST API section above for endpoints and examples, or grab the OpenAPI spec at /api/openapi.json.',
             },
           ].map((item) => (
             <div key={item.q} className="space-y-1">
