@@ -49,3 +49,102 @@ export interface SocialCardBundle {
   dark: Blob;
   metaTags: string;
 }
+
+// --- Color Palette Generator ---
+
+export type ColorHarmony =
+  | 'complementary'
+  | 'analogous'
+  | 'triadic'
+  | 'split-complementary'
+  | 'monochromatic';
+
+export type WcagLevel = 'AAA' | 'AA' | 'fail';
+
+export interface ContrastResult {
+  foreground: string;
+  background: string;
+  ratio: number;
+  levelNormal: WcagLevel;
+  levelLarge: WcagLevel;
+}
+
+export interface SemanticColor {
+  hex: string;
+  name: string;
+  role: string;
+  contrastOnWhite: ContrastResult;
+  contrastOnBlack: ContrastResult;
+  shades: Record<string, string>;
+}
+
+export interface SemanticPalette {
+  name: string;
+  harmony: ColorHarmony;
+  seedColor: string;
+  colors: {
+    primary: SemanticColor;
+    secondary: SemanticColor;
+    surface: SemanticColor;
+    error: SemanticColor;
+    warning: SemanticColor;
+    success: SemanticColor;
+    info: SemanticColor;
+  };
+  light: Record<string, string>;
+  dark: Record<string, string>;
+  metadata: {
+    generatedAt: string;
+    guidelines: string[];
+  };
+}
+
+export interface PaletteExport {
+  cssVariables: string;
+  tailwindConfig: string;
+  tokensJson: string;
+  palette: SemanticPalette;
+}
+
+// --- Placeholder Images ---
+
+export type PlaceholderCategory =
+  | 'hero'
+  | 'avatar'
+  | 'product'
+  | 'chart'
+  | 'team'
+  | 'background'
+  | 'pattern'
+  | 'icon-grid';
+
+export interface PlaceholderConfig {
+  category: PlaceholderCategory;
+  width: number;
+  height: number;
+  colors: string[];
+  label?: string;
+}
+
+export interface PlaceholderImage {
+  id: string;
+  category: PlaceholderCategory;
+  svg: string;
+  dataUri: string;
+  width: number;
+  height: number;
+  metadata: {
+    label: string;
+    usage: string;
+    suggestedAspectRatio: string;
+  };
+}
+
+export interface PlaceholderBundle {
+  images: PlaceholderImage[];
+  manifest: {
+    generatedAt: string;
+    categories: PlaceholderCategory[];
+    colorSource: string;
+  };
+}

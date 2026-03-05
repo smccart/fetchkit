@@ -1,4 +1,5 @@
-import type { ColorPalette } from './types';
+import type { ColorPalette, SemanticPalette } from './types';
+import { generateSemanticPalette } from './palette-generator';
 
 interface PaletteTemplate {
   name: string;
@@ -69,4 +70,10 @@ export function getDarkModeColors(palette: ColorPalette): ColorPalette {
       c === 'transparent' ? 'transparent' : lightenHex(c, 0.5),
     ),
   };
+}
+
+export function semanticPaletteFromColorPalette(
+  palette: ColorPalette,
+): SemanticPalette {
+  return generateSemanticPalette(palette.iconColor);
 }

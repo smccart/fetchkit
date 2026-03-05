@@ -10,6 +10,16 @@ export type {
   FaviconAsset,
   FaviconBundle,
   SocialCardBundle,
+  ColorHarmony,
+  WcagLevel,
+  ContrastResult,
+  SemanticColor,
+  SemanticPalette,
+  PaletteExport,
+  PlaceholderCategory,
+  PlaceholderConfig,
+  PlaceholderImage,
+  PlaceholderBundle,
 } from './types';
 
 // Generator
@@ -27,7 +37,31 @@ export {
   assignLetterColors,
   assignMonochromeColors,
   getDarkModeColors,
+  semanticPaletteFromColorPalette,
 } from './colors';
+
+// Palette Generator
+export {
+  generateSemanticPalette,
+  generatePaletteFromName,
+  computeContrastRatio,
+  generateShadeScale,
+} from './palette-generator';
+
+// Palette Export
+export {
+  generatePaletteCssVariables,
+  generatePaletteTailwindConfig,
+  generatePaletteTokensJson,
+  bundlePaletteExport,
+} from './palette-export';
+
+// Placeholder Images
+export {
+  generatePlaceholder,
+  generatePlaceholderBundle,
+  svgToDataUri,
+} from './placeholder-generator';
 
 // SVG
 export { buildPreviewSvg } from './svg-builder';
