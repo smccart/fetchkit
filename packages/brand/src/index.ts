@@ -3,6 +3,10 @@ export type {
   FontConfig,
   IconConfig,
   ColorPalette,
+  ColorFillMode,
+  GradientDef,
+  GradientStop,
+  WordStyle,
   LogoConfig,
   LogoVariation,
   LayoutDirection,
@@ -23,7 +27,7 @@ export type {
 } from './types';
 
 // Generator
-export { generateLogos, regenerateWithOverrides } from './generator';
+export { generateLogos, generateLogosBatch, regenerateWithOverrides } from './generator';
 
 // Icons
 export { searchIcons, fetchIconSvg, colorizeIconSvg, getIconsForCompany } from './icons';
@@ -36,6 +40,7 @@ export {
   PALETTE_TEMPLATES,
   assignLetterColors,
   assignMonochromeColors,
+  assignWordGradients,
   getDarkModeColors,
   semanticPaletteFromColorPalette,
 } from './colors';

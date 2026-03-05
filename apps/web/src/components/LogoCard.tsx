@@ -14,7 +14,7 @@ export function LogoCard({ variation, isSelected, onSelect }: LogoCardProps) {
 
   return (
     <Card
-      className={`cursor-pointer p-4 transition-all hover:shadow-lg hover:-translate-y-1 flex items-center justify-center min-h-30 ${
+      className={`cursor-pointer p-4 transition-all hover:shadow-lg hover:-translate-y-1 flex items-center justify-center min-h-40 ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
       onClick={() => onSelect(variation.id)}
@@ -23,7 +23,7 @@ export function LogoCard({ variation, isSelected, onSelect }: LogoCardProps) {
     >
       <LogoCanvas
         config={variation.config}
-        layout={hovered ? 'vertical' : 'horizontal'}
+        layout={hovered ? 'horizontal' : 'vertical'}
       />
     </Card>
   );

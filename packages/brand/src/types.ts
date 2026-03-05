@@ -10,10 +10,35 @@ export interface IconConfig {
   svg: string;
 }
 
+// Gradient support
+export interface GradientStop {
+  color: string;
+  offset: number; // 0–1
+}
+
+export interface GradientDef {
+  id: string;
+  stops: GradientStop[];
+  angle: number; // degrees
+  type: 'linear' | 'radial';
+}
+
+export type ColorFillMode = 'solid' | 'gradient';
+
 export interface ColorPalette {
   name: string;
   iconColor: string;
   letterColors: string[];
+  fillMode?: ColorFillMode;
+  gradients?: GradientDef[]; // one per word
+  iconGradient?: GradientDef;
+}
+
+// Word-level sizing/weight differentiation
+export interface WordStyle {
+  fontSize: number; // relative multiplier (1.0 = base)
+  fontWeight: number;
+  letterSpacing?: number; // em units
 }
 
 export interface LogoConfig {
@@ -21,6 +46,7 @@ export interface LogoConfig {
   font: FontConfig;
   icon: IconConfig;
   colors: ColorPalette;
+  wordStyles?: WordStyle[];
 }
 
 export interface LogoVariation {

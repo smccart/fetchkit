@@ -1,7 +1,7 @@
-import type { LogoVariation, FontConfig, IconConfig, ColorPalette } from './types';
+import type { LogoVariation, FontConfig, IconConfig, ColorPalette, WordStyle } from './types';
 import { CURATED_FONTS } from './fonts';
 import { getIconsForCompany } from './icons';
-import { PALETTE_TEMPLATES, assignLetterColors, assignMonochromeColors } from './colors';
+import { PALETTE_TEMPLATES, assignLetterColors, assignMonochromeColors, assignWordGradients } from './colors';
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -12,47 +12,96 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
-export async function generateLogos(companyName: string, count = 30): Promise<LogoVariation[]> {
-  // Fetch icons based on company name
-  const icons = await getIconsForCompany(companyName);
-  if (icons.length === 0) return [];
+// Word-style sizing presets for multi-word names
+const WORD_STYLE_PRESETS: WordStyle[][] = [
+  // Preset 0: equal
+  [{ fontSize: 1.0, fontWeight: 700 }, { fontSize: 1.0, fontWeight: 700 }],
+  // Preset 1: first word larger
+  [{ fontSize: 1.3, fontWeight: 800 }, { fontSize: 1.0, fontWeight: 400 }],
+  // Preset 2: second word larger
+  [{ fontSize: 1.0, fontWeight: 400 }, { fontSize: 1.3, fontWeight: 800 }],
+  // Preset 3: first word small+bold, second word big+light
+  [{ fontSize: 0.85, fontWeight: 800 }, { fontSize: 1.15, fontWeight: 400 }],
+];
 
-  // Shuffle fonts and palettes for variety
-  const fonts = shuffleArray(CURATED_FONTS).slice(0, 6);
-  const paletteTemplates = shuffleArray(PALETTE_TEMPLATES).slice(0, 6);
-
-  // Generate color palettes - mix of multicolor and monochrome
+// Build full palette list from templates (solid multicolor + mono + gradient)
+function buildAllPalettes(companyName: string): ColorPalette[] {
   const palettes: ColorPalette[] = [];
-  for (const template of paletteTemplates) {
+  for (const template of PALETTE_TEMPLATES) {
     palettes.push(assignLetterColors(companyName, template));
     palettes.push(assignMonochromeColors(companyName, template));
+    palettes.push(assignWordGradients(companyName, template));
   }
+  return palettes;
+}
 
-  // Generate variations using prime-offset rotation to avoid repetition
+function getWordStylesForPreset(companyName: string, presetIndex: number): WordStyle[] | undefined {
+  const words = companyName.split(' ').filter(Boolean);
+  if (words.length < 2) return undefined;
+
+  const preset = WORD_STYLE_PRESETS[presetIndex % WORD_STYLE_PRESETS.length];
+  return words.map((_, i) => preset[Math.min(i, preset.length - 1)]);
+}
+
+/**
+ * Generate a batch of logo variations using deterministic index math
+ * into the full cartesian product space.
+ */
+export function generateLogosBatch(
+  companyName: string,
+  batchIndex: number,
+  batchSize: number,
+  icons: IconConfig[],
+): LogoVariation[] {
+  const fonts = CURATED_FONTS;
+  const palettes = buildAllPalettes(companyName);
+  const hasMultipleWords = companyName.split(' ').filter(Boolean).length >= 2;
+  const styleCount = hasMultipleWords ? WORD_STYLE_PRESETS.length : 1;
+
+  const iconCount = icons.length || 1;
+  const fontCount = fonts.length;
+  const paletteCount = palettes.length;
+
+  const totalSpace = iconCount * fontCount * paletteCount * styleCount;
+  const startIdx = batchIndex * batchSize;
+
   const variations: LogoVariation[] = [];
-  const seen = new Set<string>();
 
-  for (let i = 0; i < count * 2 && variations.length < count; i++) {
-    const icon = icons[i % icons.length];
-    const font = fonts[(i * 3) % fonts.length];
-    const palette = palettes[(i * 2) % palettes.length];
+  for (let n = startIdx; n < startIdx + batchSize && n < totalSpace; n++) {
+    const iconIdx = n % iconCount;
+    const fontIdx = Math.floor(n / iconCount) % fontCount;
+    const paletteIdx = Math.floor(n / (iconCount * fontCount)) % paletteCount;
+    const styleIdx = Math.floor(n / (iconCount * fontCount * paletteCount)) % styleCount;
 
-    const key = `${icon.id}-${font.family}-${palette.name}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const icon = icons[iconIdx];
+    const font = fonts[fontIdx];
+    const palette = palettes[paletteIdx];
+    const wordStyles = getWordStylesForPreset(companyName, styleIdx);
 
     variations.push({
-      id: `logo-${i}-${Date.now()}`,
+      id: `logo-${batchIndex}-${n}-${Date.now()}`,
       config: {
         companyName,
         font,
         icon,
         colors: palette,
+        wordStyles,
       },
     });
   }
 
   return variations;
+}
+
+/**
+ * Backward-compatible wrapper. Fetches icons internally, returns a single batch.
+ */
+export async function generateLogos(companyName: string, count = 30): Promise<LogoVariation[]> {
+  const icons = await getIconsForCompany(companyName);
+  if (icons.length === 0) return [];
+
+  const shuffledIcons = shuffleArray(icons);
+  return generateLogosBatch(companyName, 0, count, shuffledIcons);
 }
 
 // Regenerate with a specific icon/font/palette locked in
@@ -74,6 +123,7 @@ export function regenerateWithOverrides(
     : paletteTemplates.flatMap((t) => [
         assignLetterColors(companyName, t),
         assignMonochromeColors(companyName, t),
+        assignWordGradients(companyName, t),
       ]);
 
   const variations: LogoVariation[] = [];

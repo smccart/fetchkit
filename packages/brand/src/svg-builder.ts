@@ -1,4 +1,4 @@
-import type { LogoConfig, LayoutDirection } from './types';
+import type { LogoConfig, LayoutDirection, GradientDef } from './types';
 
 const ICON_SIZE = 48;
 const FONT_SIZE = 36;
@@ -13,13 +13,74 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
+function buildGradientDefs(gradients: GradientDef[], iconGradient?: GradientDef): string {
+  const allGradients = [...gradients];
+  if (iconGradient) allGradients.push(iconGradient);
+  if (allGradients.length === 0) return '';
+
+  const defs = allGradients.map((g) => {
+    const rad = (g.angle * Math.PI) / 180;
+    const x1 = Math.round(50 - Math.cos(rad) * 50);
+    const y1 = Math.round(50 - Math.sin(rad) * 50);
+    const x2 = Math.round(50 + Math.cos(rad) * 50);
+    const y2 = Math.round(50 + Math.sin(rad) * 50);
+    const stops = g.stops
+      .map((s) => `    <stop offset="${s.offset * 100}%" stop-color="${s.color}"/>`)
+      .join('\n');
+    return `  <linearGradient id="${g.id}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">\n${stops}\n  </linearGradient>`;
+  });
+
+  return `<defs>\n${defs.join('\n')}\n</defs>`;
+}
+
 export function buildPreviewSvg(config: LogoConfig, layout: LayoutDirection): string {
   const { companyName, font, colors } = config;
+  const isGradient = colors.fillMode === 'gradient' && colors.gradients?.length;
 
   if (layout === 'horizontal') {
-    return buildHorizontalSvg(companyName, font.family, font.weight, colors.iconColor, colors.letterColors);
+    return buildHorizontalSvg(companyName, font.family, font.weight, colors.iconColor, colors.letterColors, isGradient ? colors.gradients : undefined, isGradient ? colors.iconGradient : undefined);
   }
-  return buildVerticalSvg(companyName, font.family, font.weight, colors.iconColor, colors.letterColors);
+  return buildVerticalSvg(companyName, font.family, font.weight, colors.iconColor, colors.letterColors, isGradient ? colors.gradients : undefined, isGradient ? colors.iconGradient : undefined);
+}
+
+function buildWordTexts(
+  name: string,
+  fontFamily: string,
+  fontWeight: number,
+  letterColors: string[],
+  gradients: GradientDef[] | undefined,
+  anchorX: number,
+  y: number,
+  textAnchor: 'start' | 'middle',
+): string {
+  if (!gradients || gradients.length === 0) {
+    const letterSpans = Array.from(name)
+      .map((char, i) => {
+        const color = letterColors[i] ?? letterColors[0];
+        if (char === ' ') return `<tspan fill="transparent"> </tspan>`;
+        return `<tspan fill="${color}">${escapeXml(char)}</tspan>`;
+      })
+      .join('');
+    return `<text x="${anchorX}" y="${y}" ${textAnchor === 'middle' ? 'text-anchor="middle" ' : ''}dominant-baseline="central" font-family="'${fontFamily}', sans-serif" font-weight="${fontWeight}" font-size="${FONT_SIZE}">${letterSpans}</text>`;
+  }
+
+  // Gradient mode: one <text> per word
+  const words = name.split(' ');
+  const charWidth = FONT_SIZE * 0.6;
+  const spaceWidth = charWidth;
+  const texts: string[] = [];
+  let xOffset = textAnchor === 'middle' ? anchorX - (name.length * charWidth) / 2 : anchorX;
+
+  for (let wi = 0; wi < words.length; wi++) {
+    const word = words[wi];
+    const grad = gradients[wi % gradients.length];
+    texts.push(
+      `<text x="${xOffset}" y="${y}" dominant-baseline="central" font-family="'${fontFamily}', sans-serif" font-weight="${fontWeight}" font-size="${FONT_SIZE}" fill="url(#${grad.id})">${escapeXml(word)}</text>`,
+    );
+    xOffset += word.length * charWidth + spaceWidth;
+  }
+
+  return texts.join('\n  ');
 }
 
 function buildHorizontalSvg(
@@ -28,8 +89,9 @@ function buildHorizontalSvg(
   fontWeight: number,
   iconColor: string,
   letterColors: string[],
+  gradients?: GradientDef[],
+  iconGradient?: GradientDef,
 ): string {
-  // Estimate text width (rough: ~0.6 * fontSize per character)
   const charWidth = FONT_SIZE * 0.6;
   const textWidth = name.length * charWidth;
   const totalWidth = ICON_SIZE + PADDING + textWidth + PADDING * 2;
@@ -38,19 +100,16 @@ function buildHorizontalSvg(
   const textX = PADDING + ICON_SIZE + PADDING;
   const textY = totalHeight / 2;
 
-  // Build individual letter tspans
-  const letterSpans = Array.from(name)
-    .map((char, i) => {
-      const color = letterColors[i] ?? letterColors[0];
-      if (char === ' ') return `<tspan fill="transparent"> </tspan>`;
-      return `<tspan fill="${color}">${escapeXml(char)}</tspan>`;
-    })
-    .join('');
+  const defs = (gradients || iconGradient) ? buildGradientDefs(gradients ?? [], iconGradient) : '';
+  const iconFill = iconGradient ? `url(#${iconGradient.id})` : iconColor;
+
+  const textContent = buildWordTexts(name, fontFamily, fontWeight, letterColors, gradients, textX, textY, 'start');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}">
-  <rect x="${PADDING}" y="${(totalHeight - ICON_SIZE) / 2}" width="${ICON_SIZE}" height="${ICON_SIZE}" rx="4" fill="${iconColor}" opacity="0.15"/>
-  <text x="${PADDING + ICON_SIZE / 2}" y="${totalHeight / 2}" text-anchor="middle" dominant-baseline="central" fill="${iconColor}" font-size="${ICON_SIZE * 0.6}" font-family="sans-serif">&#x2B22;</text>
-  <text x="${textX}" y="${textY}" dominant-baseline="central" font-family="'${fontFamily}', sans-serif" font-weight="${fontWeight}" font-size="${FONT_SIZE}">${letterSpans}</text>
+  ${defs}
+  <rect x="${PADDING}" y="${(totalHeight - ICON_SIZE) / 2}" width="${ICON_SIZE}" height="${ICON_SIZE}" rx="4" fill="${iconFill}" opacity="0.15"/>
+  <text x="${PADDING + ICON_SIZE / 2}" y="${totalHeight / 2}" text-anchor="middle" dominant-baseline="central" fill="${iconFill}" font-size="${ICON_SIZE * 0.6}" font-family="sans-serif">&#x2B22;</text>
+  ${textContent}
 </svg>`;
 }
 
@@ -60,6 +119,8 @@ function buildVerticalSvg(
   fontWeight: number,
   iconColor: string,
   letterColors: string[],
+  gradients?: GradientDef[],
+  iconGradient?: GradientDef,
 ): string {
   const charWidth = FONT_SIZE * 0.6;
   const textWidth = name.length * charWidth;
@@ -70,17 +131,15 @@ function buildVerticalSvg(
   const textX = totalWidth / 2;
   const textY = PADDING + ICON_SIZE + PADDING + FONT_SIZE / 2;
 
-  const letterSpans = Array.from(name)
-    .map((char, i) => {
-      const color = letterColors[i] ?? letterColors[0];
-      if (char === ' ') return `<tspan fill="transparent"> </tspan>`;
-      return `<tspan fill="${color}">${escapeXml(char)}</tspan>`;
-    })
-    .join('');
+  const defs = (gradients || iconGradient) ? buildGradientDefs(gradients ?? [], iconGradient) : '';
+  const iconFill = iconGradient ? `url(#${iconGradient.id})` : iconColor;
+
+  const textContent = buildWordTexts(name, fontFamily, fontWeight, letterColors, gradients, textX, textY, 'middle');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}">
-  <rect x="${(totalWidth - ICON_SIZE) / 2}" y="${PADDING}" width="${ICON_SIZE}" height="${ICON_SIZE}" rx="4" fill="${iconColor}" opacity="0.15"/>
-  <text x="${iconX}" y="${PADDING + ICON_SIZE / 2}" text-anchor="middle" dominant-baseline="central" fill="${iconColor}" font-size="${ICON_SIZE * 0.6}" font-family="sans-serif">&#x2B22;</text>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" font-family="'${fontFamily}', sans-serif" font-weight="${fontWeight}" font-size="${FONT_SIZE}">${letterSpans}</text>
+  ${defs}
+  <rect x="${(totalWidth - ICON_SIZE) / 2}" y="${PADDING}" width="${ICON_SIZE}" height="${ICON_SIZE}" rx="4" fill="${iconFill}" opacity="0.15"/>
+  <text x="${iconX}" y="${PADDING + ICON_SIZE / 2}" text-anchor="middle" dominant-baseline="central" fill="${iconFill}" font-size="${ICON_SIZE * 0.6}" font-family="sans-serif">&#x2B22;</text>
+  ${textContent}
 </svg>`;
 }

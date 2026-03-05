@@ -48,13 +48,26 @@ const FALLBACK_ICONS = [
   'mdi:leaf',
   'mdi:fire',
   'mdi:flash',
+  'mdi:compass',
+  'mdi:atom',
+  'mdi:crown',
+  'mdi:infinity',
+  'mdi:lightning-bolt-circle',
+  'mdi:star-circle',
+  'mdi:triangle',
+  'mdi:circle-slice-8',
+  'mdi:shape',
+  'mdi:creation',
 ];
 
 export async function getIconsForCompany(companyName: string): Promise<IconConfig[]> {
   const words = companyName.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
 
-  // Search for icons based on company name words
-  const searchPromises = words.map((word) => searchIcons(word, 10));
+  // Search per word + full name
+  const searchPromises = [
+    ...words.map((word) => searchIcons(word, 20)),
+    searchIcons(companyName.toLowerCase(), 20),
+  ];
   const results = await Promise.all(searchPromises);
   const allIcons = results.flat();
 
@@ -67,14 +80,14 @@ export async function getIconsForCompany(companyName: string): Promise<IconConfi
   });
 
   // If we don't have enough icons, add fallbacks
-  if (unique.length < 6) {
+  if (unique.length < 10) {
     for (const id of FALLBACK_ICONS) {
-      if (!seen.has(id) && unique.length < 6) {
+      if (!seen.has(id) && unique.length < 20) {
         unique.push({ id, name: id.split(':')[1] ?? id, svg: '' });
         seen.add(id);
       }
     }
   }
 
-  return unique.slice(0, 8);
+  return unique.slice(0, 20);
 }

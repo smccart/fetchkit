@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogoGrid } from '@/components/LogoGrid';
@@ -6,37 +6,36 @@ import { LogoCanvas } from '@/components/LogoCanvas';
 import { IconPicker } from '@/components/IconPicker';
 import { FontPicker } from '@/components/FontPicker';
 import { ColorEditor } from '@/components/ColorEditor';
-import type { LogoVariation, LogoConfig, FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
+import { useInfiniteLogos } from '@/hooks/useInfiniteLogos';
+import type { FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
 
 export default function RefinePage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [variations, setVariations] = useState<LogoVariation[]>([]);
-  const [selected, setSelected] = useState<LogoVariation | null>(null);
+  const state = location.state as { companyName?: string } | null;
+  const companyName = state?.companyName ?? '';
+
+  const {
+    variations,
+    isInitialLoading,
+    isLoadingMore,
+    hasMore,
+    generateInitial,
+    loadMore,
+    selected,
+    select,
+    updateFont,
+    updateIcon,
+    updateColors,
+  } = useInfiniteLogos(companyName);
 
   useEffect(() => {
-    const state = location.state as { variations?: LogoVariation[] } | null;
-    if (state?.variations) {
-      setVariations(state.variations);
-    } else {
+    if (!companyName) {
       navigate('/create');
+      return;
     }
-  }, [location.state, navigate]);
-
-  const handleSelect = useCallback(
-    (id: string) => {
-      const found = variations.find((v) => v.id === id);
-      if (found) setSelected({ ...found, config: { ...found.config } });
-    },
-    [variations],
-  );
-
-  const updateConfig = useCallback((updates: Partial<LogoConfig>) => {
-    setSelected((prev) => {
-      if (!prev) return prev;
-      return { ...prev, config: { ...prev.config, ...updates } };
-    });
-  }, []);
+    generateInitial();
+  }, [companyName, navigate, generateInitial]);
 
   const handleExport = () => {
     if (selected) {
@@ -50,7 +49,9 @@ export default function RefinePage() {
         <div>
           <h1 className="text-2xl font-bold">Choose Your Logo</h1>
           <p className="text-sm text-muted-foreground">
-            Click a logo to select it, then customize it below.
+            {isInitialLoading
+              ? 'Searching for icons and generating logos...'
+              : 'Click a logo to select it, then customize it below. Scroll for more variations.'}
           </p>
         </div>
         <Button variant="outline" onClick={() => navigate('/create')}>
@@ -58,11 +59,14 @@ export default function RefinePage() {
         </Button>
       </div>
 
-      {/* Logo Grid */}
+      {/* Logo Grid with Infinite Scroll */}
       <LogoGrid
         variations={variations}
         selectedId={selected?.id ?? null}
-        onSelect={handleSelect}
+        onSelect={select}
+        onLoadMore={loadMore}
+        isLoadingMore={isInitialLoading || isLoadingMore}
+        hasMore={hasMore}
       />
 
       {/* Refinement Panel */}
@@ -97,16 +101,16 @@ export default function RefinePage() {
             <div className="space-y-6 border rounded-xl p-4">
               <IconPicker
                 currentIcon={selected.config.icon}
-                onSelect={(icon: IconConfig) => updateConfig({ icon })}
+                onSelect={(icon: IconConfig) => updateIcon(icon)}
               />
               <FontPicker
                 currentFont={selected.config.font}
-                onSelect={(font: FontConfig) => updateConfig({ font })}
+                onSelect={(font: FontConfig) => updateFont(font)}
               />
               <ColorEditor
                 companyName={selected.config.companyName}
                 currentColors={selected.config.colors}
-                onChange={(colors: ColorPalette) => updateConfig({ colors })}
+                onChange={(colors: ColorPalette) => updateColors(colors)}
               />
             </div>
           </div>

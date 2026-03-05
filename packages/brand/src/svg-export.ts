@@ -1,5 +1,5 @@
 import opentype from 'opentype.js';
-import type { LogoConfig, LayoutDirection, ColorMode } from './types';
+import type { LogoConfig, LayoutDirection, ColorMode, GradientDef } from './types';
 import { getDarkModeColors } from './colors';
 import { fetchIconSvg, colorizeIconSvg } from './icons';
 
@@ -37,6 +37,7 @@ interface LetterPath {
   color: string;
   x: number;
   width: number;
+  wordIndex: number;
 }
 
 function textToLetterPaths(
@@ -48,12 +49,14 @@ function textToLetterPaths(
   const paths: LetterPath[] = [];
   let x = 0;
   const scale = fontSize / font.unitsPerEm;
+  let wordIndex = 0;
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     if (char === ' ') {
       const spaceGlyph = font.charToGlyph(' ');
       x += (spaceGlyph.advanceWidth ?? font.unitsPerEm * 0.25) * scale;
+      wordIndex++;
       continue;
     }
 
@@ -70,12 +73,57 @@ function textToLetterPaths(
         color: letterColors[i] ?? letterColors[0],
         x,
         width: advanceWidth,
+        wordIndex,
       });
       x += advanceWidth;
     }
   }
 
   return paths;
+}
+
+function buildExportGradientDefs(
+  letterPaths: LetterPath[],
+  gradients: GradientDef[],
+  iconGradient?: GradientDef,
+): string {
+  // Compute word x-bounds for userSpaceOnUse gradients
+  const wordBounds = new Map<number, { minX: number; maxX: number }>();
+  for (const lp of letterPaths) {
+    const bounds = wordBounds.get(lp.wordIndex);
+    if (!bounds) {
+      wordBounds.set(lp.wordIndex, { minX: lp.x, maxX: lp.x + lp.width });
+    } else {
+      bounds.minX = Math.min(bounds.minX, lp.x);
+      bounds.maxX = Math.max(bounds.maxX, lp.x + lp.width);
+    }
+  }
+
+  const defs: string[] = [];
+
+  for (let wi = 0; wi < gradients.length; wi++) {
+    const grad = gradients[wi];
+    const bounds = wordBounds.get(wi);
+    if (!bounds) continue;
+
+    const stops = grad.stops
+      .map((s) => `    <stop offset="${s.offset * 100}%" stop-color="${s.color}"/>`)
+      .join('\n');
+    defs.push(
+      `  <linearGradient id="${grad.id}" gradientUnits="userSpaceOnUse" x1="${bounds.minX}" y1="0" x2="${bounds.maxX}" y2="0">\n${stops}\n  </linearGradient>`,
+    );
+  }
+
+  if (iconGradient) {
+    const stops = iconGradient.stops
+      .map((s) => `    <stop offset="${s.offset * 100}%" stop-color="${s.color}"/>`)
+      .join('\n');
+    defs.push(
+      `  <linearGradient id="${iconGradient.id}" x1="0%" y1="0%" x2="100%" y2="100%">\n${stops}\n  </linearGradient>`,
+    );
+  }
+
+  return defs.length > 0 ? `<defs>\n${defs.join('\n')}\n</defs>` : '';
 }
 
 export async function buildExportSvg(
@@ -88,7 +136,15 @@ export async function buildExportSvg(
 
   // Get icon SVG
   let iconSvg = await fetchIconSvg(config.icon.id);
-  iconSvg = colorizeIconSvg(iconSvg, colors.iconColor);
+  const isGradient = colors.fillMode === 'gradient' && colors.gradients?.length;
+
+  if (isGradient && colors.iconGradient && iconSvg.includes('currentColor')) {
+    // For gradient icons, we'll inject the gradient into the export SVG and
+    // replace currentColor with url(#gradientId)
+    iconSvg = iconSvg.replace(/currentColor/g, `url(#${colors.iconGradient.id})`);
+  } else {
+    iconSvg = colorizeIconSvg(iconSvg, colors.iconColor);
+  }
 
   // Convert text to paths
   const letterPaths = textToLetterPaths(
@@ -103,10 +159,15 @@ export async function buildExportSvg(
     ? letterPaths[letterPaths.length - 1].x + letterPaths[letterPaths.length - 1].width
     : 0;
 
+  // Build gradient defs if needed
+  const gradientDefs = isGradient
+    ? buildExportGradientDefs(letterPaths, colors.gradients!, colors.iconGradient)
+    : '';
+
   if (layout === 'horizontal') {
-    return buildHorizontalExportSvg(iconSvg, letterPaths, textWidth, colors.iconColor);
+    return buildHorizontalExportSvg(iconSvg, letterPaths, textWidth, colors.iconColor, gradientDefs, isGradient ? colors.gradients : undefined);
   }
-  return buildVerticalExportSvg(iconSvg, letterPaths, textWidth, colors.iconColor);
+  return buildVerticalExportSvg(iconSvg, letterPaths, textWidth, colors.iconColor, gradientDefs, isGradient ? colors.gradients : undefined);
 }
 
 function buildHorizontalExportSvg(
@@ -114,23 +175,29 @@ function buildHorizontalExportSvg(
   letterPaths: LetterPath[],
   textWidth: number,
   _iconColor: string,
+  gradientDefs: string,
+  gradients?: GradientDef[],
 ): string {
   const totalWidth = ICON_SIZE + PADDING + textWidth + PADDING * 2;
   const totalHeight = Math.max(ICON_SIZE, FONT_SIZE) + PADDING * 2;
 
-  // Position icon on the left, text to the right
   const iconY = (totalHeight - ICON_SIZE) / 2;
   const textGroupX = PADDING + ICON_SIZE + PADDING;
   const textGroupY = (totalHeight - FONT_SIZE) / 2;
 
   const pathElements = letterPaths
-    .map((lp) => `    <path d="${lp.pathData}" fill="${lp.color}"/>`)
+    .map((lp) => {
+      const fill = gradients
+        ? `url(#${gradients[lp.wordIndex % gradients.length].id})`
+        : lp.color;
+      return `    <path d="${lp.pathData}" fill="${fill}"/>`;
+    })
     .join('\n');
 
-  // Extract inner SVG content from icon, re-embed as a group
   const iconInner = extractSvgContent(iconSvg);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}">
+  ${gradientDefs}
   <g transform="translate(${PADDING}, ${iconY})">
     <svg width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="${getViewBox(iconSvg)}">
       ${iconInner}
@@ -147,6 +214,8 @@ function buildVerticalExportSvg(
   letterPaths: LetterPath[],
   textWidth: number,
   _iconColor: string,
+  gradientDefs: string,
+  gradients?: GradientDef[],
 ): string {
   const totalWidth = Math.max(ICON_SIZE, textWidth) + PADDING * 2;
   const totalHeight = ICON_SIZE + PADDING + FONT_SIZE + PADDING * 2;
@@ -156,12 +225,18 @@ function buildVerticalExportSvg(
   const textGroupY = PADDING + ICON_SIZE + PADDING;
 
   const pathElements = letterPaths
-    .map((lp) => `    <path d="${lp.pathData}" fill="${lp.color}"/>`)
+    .map((lp) => {
+      const fill = gradients
+        ? `url(#${gradients[lp.wordIndex % gradients.length].id})`
+        : lp.color;
+      return `    <path d="${lp.pathData}" fill="${fill}"/>`;
+    })
     .join('\n');
 
   const iconInner = extractSvgContent(iconSvg);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}">
+  ${gradientDefs}
   <g transform="translate(${iconX}, ${PADDING})">
     <svg width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="${getViewBox(iconSvg)}">
       ${iconInner}
@@ -174,7 +249,6 @@ ${pathElements}
 }
 
 export function extractSvgContent(svg: string): string {
-  // Remove the outer <svg> tags, keep inner content
   return svg.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim();
 }
 
