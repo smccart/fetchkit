@@ -86,6 +86,16 @@ export default function McpSection() {
                   description: 'Generate multiple legal documents at once',
                   inputs: 'types[], companyName, websiteUrl, contactEmail',
                 },
+                {
+                  name: 'generate_seo_artifact',
+                  description: 'Generate a single SEO artifact (meta tags, sitemap, robots.txt, JSON-LD)',
+                  inputs: 'type, siteName, siteUrl',
+                },
+                {
+                  name: 'generate_seo_bundle',
+                  description: 'Generate multiple SEO artifacts at once',
+                  inputs: 'types[], siteName, siteUrl',
+                },
               ].map((tool) => (
                 <tr key={tool.name} className="border-b last:border-0">
                   <td className="px-4 py-2 font-mono text-xs text-foreground whitespace-nowrap">{tool.name}</td>
@@ -98,11 +108,11 @@ export default function McpSection() {
         </div>
       </div>
 
-      {/* Workflow Example */}
+      {/* Workflow Examples */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold">Example Workflow</h3>
+        <h3 className="text-lg font-semibold">Example Workflows</h3>
         <p className="text-muted-foreground text-sm">
-          A typical agent workflow: generate logos, pick one, export production SVGs, and generate design tokens.
+          <strong>Brand workflow</strong> — generate logos, pick one, export production SVGs, and generate design tokens.
         </p>
         <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground overflow-x-auto">
           <pre>{`1. generate_brand_logos({ companyName: "Nexus", count: 10 })
@@ -116,6 +126,31 @@ export default function McpSection() {
 
 4. generate_favicon({ iconId: "mdi:rocket", iconColor: "#6366f1", companyName: "Nexus" })
    → Returns favicon SVG, HTML snippet, and web manifest`}</pre>
+        </div>
+        <p className="text-muted-foreground text-sm mt-4">
+          <strong>SEO + Legal workflow</strong> — scaffold a complete project in one pass.
+        </p>
+        <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground overflow-x-auto">
+          <pre>{`1. generate_seo_bundle({
+     types: ["meta-tags", "sitemap", "robots-txt", "json-ld"],
+     siteName: "Nexus",
+     siteUrl: "https://nexus.dev",
+     description: "Build faster with Nexus",
+     pages: [
+       { path: "/", priority: 1.0 },
+       { path: "/about", priority: 0.8 },
+       { path: "/pricing", priority: 0.9 }
+     ]
+   })
+   → Returns meta tags HTML, sitemap.xml, robots.txt, and JSON-LD scripts
+
+2. generate_legal_bundle({
+     types: ["privacy-policy", "terms-of-service"],
+     companyName: "Nexus",
+     websiteUrl: "https://nexus.dev",
+     contactEmail: "legal@nexus.dev"
+   })
+   → Returns Markdown and HTML for each legal document`}</pre>
         </div>
       </div>
     </div>

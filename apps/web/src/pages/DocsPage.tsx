@@ -7,6 +7,7 @@ const TOC = [
   { id: 'overview', label: 'Overview' },
   { id: 'brand-service', label: 'Brand Service' },
   { id: 'legal-service', label: 'Legal Service' },
+  { id: 'seo-service', label: 'SEO Service' },
   { id: 'architecture', label: 'Architecture' },
   { id: 'api', label: 'REST API' },
   { id: 'mcp', label: 'MCP Server' },
@@ -85,7 +86,7 @@ export default function DocsPage() {
             <ul className="text-muted-foreground space-y-1 list-disc list-inside">
               <li><strong>Brand Kit</strong> — logos, favicons, social cards, design tokens (live now)</li>
               <li><strong>Legal Docs</strong> — privacy policies, terms of service, cookie consent, and more (live now)</li>
-              <li><strong>SEO Config</strong> — meta tags, sitemaps, robots.txt, structured data (coming soon)</li>
+              <li><strong>SEO Toolkit</strong> — meta tags, sitemaps, robots.txt, Schema.org structured data (live now)</li>
               <li><strong>Security</strong> — CSP headers, CORS configs, auth scaffolds (coming soon)</li>
             </ul>
           </div>
@@ -219,6 +220,66 @@ export default function DocsPage() {
         </div>
       </Section>
 
+      {/* SEO Service */}
+      <Section id="seo-service" title="SEO Service">
+        <div className="space-y-6">
+          <p className="text-muted-foreground">
+            The SEO service generates search-engine-ready artifacts from your project details.
+            Enter a site name and URL — get meta tags, sitemaps, robots.txt, and Schema.org
+            structured data ready to paste into your project.
+          </p>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">How it works</h3>
+            <ol className="text-muted-foreground space-y-2 list-decimal list-inside">
+              <li>Go to the <Link to="/seo" className="text-primary underline underline-offset-4">SEO</Link> page and enter your site name and URL</li>
+              <li>Optionally add page title, description, OG image, and Twitter handle</li>
+              <li>Configure sitemap pages, robots.txt rules, and Schema.org entities</li>
+              <li>Click Generate — all artifacts are created instantly</li>
+              <li>Copy code snippets or download everything as a ZIP</li>
+            </ol>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Artifact types</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left px-4 py-2 font-medium">Artifact</th>
+                    <th className="text-left px-4 py-2 font-medium">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">Meta Tags</td>
+                    <td className="px-4 py-2">HTML meta tags: title, description, Open Graph, Twitter Cards, canonical URL.</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">XML Sitemap</td>
+                    <td className="px-4 py-2">Valid sitemap.xml with URLs, last modified dates, change frequency, and priority.</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">robots.txt</td>
+                    <td className="px-4 py-2">Crawl directives with configurable User-agent rules, allow/disallow paths, crawl delay.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium text-foreground">Schema.org JSON-LD</td>
+                    <td className="px-4 py-2">Structured data for 12 entity types: Organization, WebSite, WebPage, Product, Article, FAQ, and more.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Output format</h3>
+            <p className="text-muted-foreground">
+              Each artifact is raw code (HTML, XML, plain text, or JSON) ready to copy into your
+              project's <code className="text-xs bg-muted px-1.5 py-0.5 rounded">&lt;head&gt;</code>,
+              root directory, or CMS.
+            </p>
+          </div>
+        </div>
+      </Section>
+
       {/* Architecture */}
       <Section id="architecture" title="Architecture">
         <div className="space-y-6">
@@ -235,6 +296,7 @@ export default function DocsPage() {
 ├── packages/
 │   ├── brand/            → @fetchkit/brand (logo, favicon, tokens)
 │   ├── legal/            → @fetchkit/legal (legal document generation)
+│   ├── seo/              → @fetchkit/seo (meta tags, sitemap, JSON-LD)
 │   ├── mcp/              → @fetchkit/mcp (MCP server, stdio)
 │   ├── tsconfig/         → shared TypeScript config
 │   └── eslint-config/    → shared ESLint config

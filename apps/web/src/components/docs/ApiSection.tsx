@@ -212,6 +212,78 @@ const { svg, htmlSnippet, manifest } = await res.json();
           ]}
         />
       </div>
+      {/* SEO */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold">SEO Toolkit</h3>
+
+        <EndpointBlock
+          method="POST"
+          path="/seo/generate"
+          summary="Generate a single SEO artifact (meta tags, sitemap, robots.txt, or JSON-LD)."
+          params={[
+            { name: 'type', type: 'string', required: true, description: 'meta-tags, sitemap, robots-txt, or json-ld' },
+            { name: 'siteName', type: 'string', required: true, description: 'Site or company name' },
+            { name: 'siteUrl', type: 'string', required: true, description: 'Site URL (e.g. https://acme.com)' },
+            { name: 'title', type: 'string', description: 'Page title (defaults to siteName)' },
+            { name: 'description', type: 'string', description: 'Meta description' },
+            { name: 'ogImage', type: 'string', description: 'URL to Open Graph image' },
+            { name: 'twitterHandle', type: 'string', description: 'Twitter handle (e.g. @acme)' },
+            { name: 'pages', type: 'SitemapPage[]', description: 'Array of {path, lastmod, changefreq, priority} for sitemaps' },
+            { name: 'robotsConfig', type: 'RobotsConfig', description: 'Rules, sitemapUrl, crawlDelay for robots.txt' },
+            { name: 'jsonLdEntities', type: 'JsonLdEntity[]', description: 'Array of {type, data} for Schema.org markup' },
+          ]}
+          curl={`curl -X POST "${BASE}/seo/generate" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "type": "meta-tags",
+    "siteName": "Acme Corp",
+    "siteUrl": "https://acme.com",
+    "description": "Build amazing things with Acme"
+  }'`}
+          fetch={`const res = await fetch("${BASE}/seo/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    type: "meta-tags",
+    siteName: "Acme Corp",
+    siteUrl: "https://acme.com",
+    description: "Build amazing things with Acme",
+  }),
+});
+const { artifact } = await res.json();
+// artifact.content — raw HTML/XML/text to paste into your project
+// artifact.filename — suggested filename (e.g. meta-tags.html)`}
+        />
+
+        <EndpointBlock
+          method="POST"
+          path="/seo/bundle"
+          summary="Generate multiple SEO artifacts at once. Returns all selected artifacts in one response."
+          params={[
+            { name: 'types', type: 'string[]', required: true, description: 'Array of artifact types to generate' },
+            { name: 'siteName', type: 'string', required: true, description: 'Site or company name' },
+            { name: 'siteUrl', type: 'string', required: true, description: 'Site URL' },
+          ]}
+          curl={`curl -X POST "${BASE}/seo/bundle" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "types": ["meta-tags", "sitemap", "robots-txt", "json-ld"],
+    "siteName": "Acme Corp",
+    "siteUrl": "https://acme.com"
+  }'`}
+        />
+
+        <EndpointBlock
+          method="GET"
+          path="/seo/types"
+          summary="List all available SEO artifact types with descriptions."
+          curl={`curl "${BASE}/seo/types"`}
+          fetch={`const res = await fetch("${BASE}/seo/types");
+const { types } = await res.json();
+// types["meta-tags"] = { title, description }`}
+        />
+      </div>
+
       {/* Legal */}
       <div className="space-y-6">
         <h3 className="text-lg font-semibold">Legal Documents</h3>
