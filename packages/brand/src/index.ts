@@ -43,6 +43,7 @@ export {
   assignWordGradients,
   getDarkModeColors,
   semanticPaletteFromColorPalette,
+  buildAccentPalettes,
 } from './colors';
 
 // Palette Generator

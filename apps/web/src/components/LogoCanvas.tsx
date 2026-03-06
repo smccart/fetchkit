@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { Icon } from '@iconify/react';
-import type { LogoConfig, LayoutDirection } from '@fetchkit/brand';
+import type { LogoConfig } from '@fetchkit/brand';
+
+export type PreviewLayout = 'horizontal' | 'vertical' | 'overlap' | 'icon-right';
 
 interface LogoCanvasProps {
   config: LogoConfig;
-  layout: LayoutDirection;
+  layout: PreviewLayout;
   className?: string;
 }
 
@@ -27,8 +29,8 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
     }));
   }, [companyName, colors.letterColors]);
 
-  const baseFontSize = layout === 'horizontal' ? 28 : 28;
-  const iconSize = layout === 'horizontal' ? 40 : 48;
+  const baseFontSize = 28;
+  const iconSize = layout === 'vertical' ? 48 : 40;
 
   const renderText = () => {
     if (isGradient) {
@@ -129,6 +131,30 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
     );
   }
 
+  if (layout === 'icon-right') {
+    return (
+      <div className={`flex items-center gap-3 ${className}`}>
+        {renderText()}
+        <Icon icon={icon.id} width={iconSize} height={iconSize} style={{ color: iconColor }} />
+      </div>
+    );
+  }
+
+  if (layout === 'overlap') {
+    return (
+      <div className={`relative flex items-center justify-center ${className}`}>
+        <Icon
+          icon={icon.id}
+          width={72}
+          height={72}
+          style={{ color: iconColor, opacity: 0.12, position: 'absolute' }}
+        />
+        <span className="relative">{renderText()}</span>
+      </div>
+    );
+  }
+
+  // vertical (default)
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
       <Icon icon={icon.id} width={iconSize} height={iconSize} style={{ color: iconColor }} />

@@ -8,6 +8,7 @@ import { IconPicker } from '@/components/IconPicker';
 import { FontPicker } from '@/components/FontPicker';
 import { ColorEditor } from '@/components/ColorEditor';
 import { useInfiniteLogos } from '@/hooks/useInfiniteLogos';
+import { useSiteColor } from '@/hooks/useSiteColor';
 import type { FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
 
 const DEFAULT_NAME = 'FetchKit';
@@ -15,6 +16,7 @@ const DEFAULT_NAME = 'FetchKit';
 export default function RefinePage() {
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState(DEFAULT_NAME);
+  const { color: accentColor } = useSiteColor();
   const debouncedRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const initialRef = useRef(true);
 
@@ -30,9 +32,9 @@ export default function RefinePage() {
     updateFont,
     updateIcon,
     updateColors,
-  } = useInfiniteLogos(companyName);
+  } = useInfiniteLogos(companyName, accentColor);
 
-  // Generate on mount immediately, then debounce subsequent name changes
+  // Generate on mount immediately, then debounce subsequent changes
   useEffect(() => {
     if (!companyName.trim()) return;
 
@@ -49,7 +51,7 @@ export default function RefinePage() {
 
     return () => clearTimeout(debouncedRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companyName]);
+  }, [companyName, accentColor]);
 
   const handleExport = () => {
     if (selected) {
@@ -100,19 +102,20 @@ export default function RefinePage() {
             {/* Preview */}
             <div className="space-y-6">
               <h2 className="text-lg font-semibold">Preview</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border rounded-xl p-8 bg-white flex items-center justify-center">
-                  <LogoCanvas config={selected.config} layout="horizontal" />
-                </div>
-                <div className="border rounded-xl p-8 bg-white flex items-center justify-center">
-                  <LogoCanvas config={selected.config} layout="vertical" />
-                </div>
-                <div className="border rounded-xl p-8 bg-gray-900 flex items-center justify-center">
-                  <LogoCanvas config={selected.config} layout="horizontal" />
-                </div>
-                <div className="border rounded-xl p-8 bg-gray-900 flex items-center justify-center">
-                  <LogoCanvas config={selected.config} layout="vertical" />
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                {([
+                  { layout: 'horizontal', label: 'Horizontal' },
+                  { layout: 'vertical', label: 'Stacked' },
+                  { layout: 'icon-right', label: 'Icon Right' },
+                  { layout: 'overlap', label: 'Watermark' },
+                ] as const).map(({ layout, label }) => (
+                  <div key={layout} className="border rounded-xl p-6 bg-white flex flex-col items-center gap-3">
+                    <div className="flex-1 flex items-center justify-center min-h-24">
+                      <LogoCanvas config={selected.config} layout={layout} />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">{label}</span>
+                  </div>
+                ))}
               </div>
               <div className="flex justify-center">
                 <Button size="lg" onClick={handleExport}>

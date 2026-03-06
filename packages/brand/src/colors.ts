@@ -1,9 +1,96 @@
 import type { ColorPalette, GradientDef, SemanticPalette } from './types';
 import { generateSemanticPalette } from './palette-generator';
 
-interface PaletteTemplate {
+export interface PaletteTemplate {
   name: string;
   colors: string[];
+}
+
+// --- HSL helpers for accent-derived palettes ---
+
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const num = parseInt(hex.replace('#', ''), 16);
+  let r = ((num >> 16) & 0xff) / 255;
+  let g = ((num >> 8) & 0xff) / 255;
+  let b = (num & 0xff) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return { h: h * 360, s, l };
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  const toHex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+export function buildAccentPalettes(accentHex: string): PaletteTemplate[] {
+  const { h, s, l } = hexToHsl(accentHex);
+  const sat = Math.max(s, 0.5);
+
+  return [
+    {
+      name: 'Brand',
+      colors: [
+        accentHex,
+        hslToHex(h, sat, Math.min(l + 0.15, 0.85)),
+        hslToHex(h, sat * 0.8, Math.max(l - 0.15, 0.2)),
+        hslToHex(h + 15, sat, l),
+        hslToHex(h - 15, sat, l),
+        hslToHex(h, sat * 0.6, Math.min(l + 0.3, 0.9)),
+      ],
+    },
+    {
+      name: 'Brand Complement',
+      colors: [
+        accentHex,
+        hslToHex(h + 180, sat, l),
+        hslToHex(h, sat, Math.min(l + 0.2, 0.85)),
+        hslToHex(h + 180, sat, Math.min(l + 0.2, 0.85)),
+        hslToHex(h + 30, sat * 0.7, l),
+        hslToHex(h + 210, sat * 0.7, l),
+      ],
+    },
+    {
+      name: 'Brand Analogous',
+      colors: [
+        accentHex,
+        hslToHex(h + 30, sat, l),
+        hslToHex(h - 30, sat, l),
+        hslToHex(h + 60, sat * 0.8, Math.min(l + 0.1, 0.8)),
+        hslToHex(h - 60, sat * 0.8, Math.min(l + 0.1, 0.8)),
+        hslToHex(h, sat * 0.5, Math.min(l + 0.25, 0.9)),
+      ],
+    },
+    {
+      name: 'Brand Triadic',
+      colors: [
+        accentHex,
+        hslToHex(h + 120, sat, l),
+        hslToHex(h + 240, sat, l),
+        hslToHex(h, sat, Math.min(l + 0.2, 0.85)),
+        hslToHex(h + 120, sat, Math.min(l + 0.2, 0.85)),
+        hslToHex(h + 240, sat, Math.min(l + 0.2, 0.85)),
+      ],
+    },
+  ];
 }
 
 export const PALETTE_TEMPLATES: PaletteTemplate[] = [
