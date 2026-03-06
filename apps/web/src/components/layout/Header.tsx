@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Bot } from 'lucide-react';
+import { useSiteColor } from '@/hooks/useSiteColor';
 
 const NAV_ITEMS = [
   { label: 'Brand', to: '/create' },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 
 export function Header() {
   const location = useLocation();
+  const { color, setColor } = useSiteColor();
 
   return (
     <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
@@ -40,7 +42,19 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-4">
+          <label className="relative cursor-pointer group" title="Site accent color">
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="sr-only"
+            />
+            <div
+              className="h-6 w-6 rounded-full border border-border ring-offset-background transition-shadow group-hover:ring-2 group-hover:ring-ring group-hover:ring-offset-2"
+              style={{ backgroundColor: color }}
+            />
+          </label>
           <Link
             to="/docs"
             className={`text-sm font-medium transition-colors ${

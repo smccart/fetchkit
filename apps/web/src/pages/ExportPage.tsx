@@ -11,6 +11,7 @@ import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { useFavicon } from '@/hooks/useFavicon';
 import { useSocialCards } from '@/hooks/useSocialCards';
 import { usePlaceholders } from '@/hooks/usePlaceholders';
+import { useSiteColor } from '@/hooks/useSiteColor';
 import type { LogoConfig } from '@fetchkit/brand';
 import { semanticPaletteFromColorPalette, bundlePaletteExport } from '@fetchkit/brand';
 
@@ -20,7 +21,8 @@ export default function ExportPage() {
   const [config, setConfig] = useState<LogoConfig | null>(null);
   const favicon = useFavicon(config);
   const socialCards = useSocialCards(config);
-  const placeholders = usePlaceholders();
+  const { color } = useSiteColor();
+  const placeholders = usePlaceholders(color);
 
   const paletteExport = useMemo(() => {
     if (!config) return null;
@@ -112,10 +114,6 @@ export default function ExportPage() {
           <PlaceholderPanel
             bundle={placeholders.bundle}
             isGenerating={placeholders.isGenerating}
-            color={placeholders.color}
-            onColorChange={placeholders.setColor}
-            selectedCategories={placeholders.selectedCategories}
-            onSelectedCategoriesChange={placeholders.setSelectedCategories}
             onDownloadAll={placeholders.downloadAll}
             onDownloadSingle={placeholders.downloadSingle}
           />

@@ -10,38 +10,28 @@ const ALL_CATEGORIES: PlaceholderCategory[] = [
 interface UsePlaceholdersReturn {
   bundle: PlaceholderBundle | null;
   isGenerating: boolean;
-  color: string;
-  setColor: (hex: string) => void;
-  selectedCategories: PlaceholderCategory[];
-  setSelectedCategories: (cats: PlaceholderCategory[]) => void;
   downloadAll: () => Promise<void>;
   downloadSingle: (image: PlaceholderImage) => void;
 }
 
-export function usePlaceholders(initialColor: string = '#6366f1'): UsePlaceholdersReturn {
+export function usePlaceholders(color: string): UsePlaceholdersReturn {
   const [bundle, setBundle] = useState<PlaceholderBundle | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [color, setColor] = useState(initialColor);
-  const [selectedCategories, setSelectedCategories] = useState<PlaceholderCategory[]>(ALL_CATEGORIES);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Auto-generate whenever color or categories change (debounced)
   useEffect(() => {
-    if (selectedCategories.length === 0) return;
-
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setIsGenerating(true);
-      // Use setTimeout(0) to avoid blocking UI during synchronous generation
       setTimeout(() => {
-        const result = generatePlaceholderBundle([color], selectedCategories);
+        const result = generatePlaceholderBundle([color], ALL_CATEGORIES);
         setBundle(result);
         setIsGenerating(false);
       }, 0);
     }, 150);
 
     return () => clearTimeout(timerRef.current);
-  }, [color, selectedCategories]);
+  }, [color]);
 
   const downloadAll = useCallback(async () => {
     if (!bundle) return;
@@ -75,10 +65,6 @@ export function usePlaceholders(initialColor: string = '#6366f1'): UsePlaceholde
   return {
     bundle,
     isGenerating,
-    color,
-    setColor,
-    selectedCategories,
-    setSelectedCategories,
     downloadAll,
     downloadSingle,
   };
