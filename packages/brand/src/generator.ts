@@ -116,8 +116,12 @@ export function generateLogosBatch(
 /**
  * Backward-compatible wrapper. Fetches icons internally, returns a single batch.
  */
-export async function generateLogos(companyName: string, count = 30): Promise<LogoVariation[]> {
-  const icons = await getIconsForCompany(companyName);
+export async function generateLogos(
+  companyName: string,
+  count = 30,
+  freepikApiKey?: string,
+): Promise<LogoVariation[]> {
+  const icons = await getIconsForCompany(companyName, freepikApiKey);
   if (icons.length === 0) return [];
 
   const shuffledIcons = shuffleArray(icons);

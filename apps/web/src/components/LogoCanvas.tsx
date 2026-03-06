@@ -122,10 +122,25 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
     ? colors.iconGradient.stops[0]?.color ?? colors.iconColor
     : colors.iconColor;
 
+  const isFreepik = icon.id.startsWith('freepik:');
+
+  const renderIcon = (size: number, extraStyle?: React.CSSProperties) =>
+    isFreepik && icon.svg ? (
+      <img
+        src={`data:image/svg+xml,${encodeURIComponent(icon.svg)}`}
+        width={size}
+        height={size}
+        alt={icon.name}
+        style={extraStyle}
+      />
+    ) : (
+      <Icon icon={icon.id} width={size} height={size} style={{ color: iconColor, ...extraStyle }} />
+    );
+
   if (layout === 'horizontal') {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        <Icon icon={icon.id} width={iconSize} height={iconSize} style={{ color: iconColor }} />
+        {renderIcon(iconSize)}
         {renderText()}
       </div>
     );
@@ -135,7 +150,7 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         {renderText()}
-        <Icon icon={icon.id} width={iconSize} height={iconSize} style={{ color: iconColor }} />
+        {renderIcon(iconSize)}
       </div>
     );
   }
@@ -143,12 +158,7 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
   if (layout === 'overlap') {
     return (
       <div className={`relative flex items-center justify-center ${className}`}>
-        <Icon
-          icon={icon.id}
-          width={72}
-          height={72}
-          style={{ color: iconColor, opacity: 0.12, position: 'absolute' }}
-        />
+        {renderIcon(72, { opacity: 0.12, position: 'absolute' })}
         <span className="relative">{renderText()}</span>
       </div>
     );
@@ -157,7 +167,7 @@ export function LogoCanvas({ config, layout, className = '' }: LogoCanvasProps) 
   // vertical (default)
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
-      <Icon icon={icon.id} width={iconSize} height={iconSize} style={{ color: iconColor }} />
+      {renderIcon(iconSize)}
       {renderText()}
     </div>
   );

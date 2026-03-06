@@ -29,7 +29,8 @@ export function useInfiniteLogos(companyName: string, accentColor?: string, seco
     loadAllFonts(CURATED_FONTS);
 
     try {
-      const icons = await getIconsForCompany(companyName.trim());
+      const freepikKey = import.meta.env.VITE_FREEPIK_API_KEY as string | undefined;
+      const icons = await getIconsForCompany(companyName.trim(), freepikKey);
       iconsRef.current = icons;
 
       if (icons.length === 0) {

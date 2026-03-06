@@ -29,19 +29,38 @@ async function parseBody<T>(req: Request): Promise<T | null> {
 
 // --- Route handlers ---
 
+const FREEPIK_API_KEY = typeof process !== 'undefined' ? process.env.FREEPIK_API_KEY : undefined;
+
 async function handleGenerate(url: URL): Promise<Response> {
   const b = brand;
   const name = url.searchParams.get('name');
   if (!name) return error('Missing required parameter: name');
   const count = Math.min(Number(url.searchParams.get('count') ?? 30), 30);
   try {
-    const variations = await b.generateLogos(name, count);
+    const variations = await b.generateLogos(name, count, FREEPIK_API_KEY);
     return json({
       variations,
       meta: { companyName: name, count: variations.length, generatedAt: new Date().toISOString() },
     });
   } catch (e) {
     return error(`Generation failed: ${e instanceof Error ? e.message : 'Unknown error'}`, 500);
+  }
+}
+
+async function handleIconGenerate(req: Request): Promise<Response> {
+  if (!FREEPIK_API_KEY) return error('AI icon generation not configured (missing FREEPIK_API_KEY)', 503);
+  const body = await parseBody<{ prompt: string; style?: string }>(req);
+  if (!body?.prompt) return error('Missing required field: prompt');
+  try {
+    const icon = await brand.generateFreepikIcon(
+      body.prompt,
+      FREEPIK_API_KEY,
+      (body.style as any) ?? 'solid',
+    );
+    if (!icon) return error('Icon generation failed or timed out', 500);
+    return json({ icon });
+  } catch (e) {
+    return error(`AI icon generation failed: ${e instanceof Error ? e.message : 'Unknown error'}`, 500);
   }
 }
 
@@ -212,6 +231,9 @@ export default async function handler(req: Request): Promise<Response> {
       return handleIconSearch(url);
     case 'icons/get':
       return handleIconById(url);
+    case 'icons/generate':
+      if (req.method !== 'POST') return error('Method not allowed', 405);
+      return handleIconGenerate(req);
     case 'palette/generate':
       if (req.method !== 'POST') return error('Method not allowed', 405);
       return handlePaletteGenerate(req);

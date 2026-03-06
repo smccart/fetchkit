@@ -157,7 +157,7 @@ export async function buildExportSvg(
   const font = await loadFont(config.font.family, config.font.weight);
 
   // Get icon SVG
-  let iconSvg = await fetchIconSvg(config.icon.id);
+  let iconSvg = await fetchIconSvg(config.icon.id, config.icon.svg);
   const isGradient = colors.fillMode === 'gradient' && colors.gradients?.length;
 
   if (isGradient && colors.iconGradient && iconSvg.includes('currentColor')) {

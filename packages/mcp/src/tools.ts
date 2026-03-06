@@ -18,6 +18,7 @@ import {
   generateHtmlSnippet,
   searchIcons,
   generatePlaceholder,
+  generateFreepikIcon,
 } from '@fetchkit/brand';
 import type { ColorHarmony, LayoutDirection, ColorMode, PlaceholderCategory } from '@fetchkit/brand';
 import { generateDocument, generateBundle, LEGAL_DOC_TYPES } from '@fetchkit/legal';
@@ -29,18 +30,20 @@ function textResult(data: unknown): { content: Array<{ type: 'text'; text: strin
   };
 }
 
+const FREEPIK_API_KEY = typeof process !== 'undefined' ? process.env.FREEPIK_API_KEY : undefined;
+
 export function registerTools(server: McpServer): void {
   // 1. Generate brand logos
   server.registerTool('generate_brand_logos', {
     title: 'Generate Brand Logos',
     description:
-      'Generate logo variations for a company. Returns up to 30 logo variations with different icon, font, and color combinations. Each variation includes a LogoConfig that can be passed to export_brand_svg.',
+      'Generate logo variations for a company. Returns up to 30 logo variations with different icon, font, and color combinations. Each variation includes a LogoConfig that can be passed to export_brand_svg. When FREEPIK_API_KEY is set, includes AI-generated icons alongside Iconify results.',
     inputSchema: {
       companyName: z.string().describe('The company or project name'),
       count: z.number().max(30).default(10).describe('Number of variations (max 30)'),
     },
   }, async ({ companyName, count }) => {
-    const variations = await generateLogos(companyName, count);
+    const variations = await generateLogos(companyName, count, FREEPIK_API_KEY);
     return textResult({ variations, count: variations.length });
   });
 
@@ -188,7 +191,27 @@ export function registerTools(server: McpServer): void {
     return textResult({ icons, count: icons.length });
   });
 
-  // 8. Generate legal document
+  // 8. Generate AI icon (Freepik)
+  server.registerTool('generate_ai_icon', {
+    title: 'Generate AI Icon',
+    description:
+      'Generate a custom AI icon using Freepik. Requires FREEPIK_API_KEY environment variable. Returns an IconConfig with embedded SVG.',
+    inputSchema: {
+      prompt: z.string().describe('Description of the icon to generate (e.g. "rocket launching into space")'),
+      style: z.enum(['solid', 'outline', 'color', 'flat', 'sticker']).default('solid').describe('Visual style'),
+    },
+  }, async ({ prompt, style }) => {
+    if (!FREEPIK_API_KEY) {
+      return textResult({ error: 'FREEPIK_API_KEY environment variable not set. AI icon generation unavailable.' });
+    }
+    const icon = await generateFreepikIcon(prompt, FREEPIK_API_KEY, style);
+    if (!icon) {
+      return textResult({ error: 'Icon generation failed or timed out' });
+    }
+    return textResult({ icon });
+  });
+
+  // 10. Generate legal document
   const legalDocTypes = Object.keys(LEGAL_DOC_TYPES) as LegalDocType[];
   const legalTypeEnum = z.enum(legalDocTypes as [string, ...string[]]);
 
@@ -213,7 +236,7 @@ export function registerTools(server: McpServer): void {
     return textResult(doc);
   });
 
-  // 9. Generate legal bundle
+  // 11. Generate legal bundle
   server.registerTool('generate_legal_bundle', {
     title: 'Generate Legal Bundle',
     description:

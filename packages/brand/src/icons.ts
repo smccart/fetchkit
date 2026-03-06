@@ -1,4 +1,5 @@
 import type { IconConfig } from './types';
+import { generateFreepikIcons } from './freepik';
 
 interface IconifySearchResponse {
   icons: string[];
@@ -17,7 +18,10 @@ export async function searchIcons(query: string, limit = 30): Promise<IconConfig
   }));
 }
 
-export async function fetchIconSvg(iconId: string): Promise<string> {
+export async function fetchIconSvg(iconId: string, preloadedSvg?: string): Promise<string> {
+  // If SVG is already available (e.g. Freepik AI icons), return it directly
+  if (preloadedSvg) return preloadedSvg;
+
   const [prefix, name] = iconId.split(':');
   if (!prefix || !name) return '';
   const url = `https://api.iconify.design/${prefix}/${name}.svg`;
@@ -60,24 +64,38 @@ const FALLBACK_ICONS = [
   'mdi:creation',
 ];
 
-export async function getIconsForCompany(companyName: string): Promise<IconConfig[]> {
+export async function getIconsForCompany(
+  companyName: string,
+  freepikApiKey?: string,
+): Promise<IconConfig[]> {
   const words = companyName.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
 
-  // Search per word + full name
-  const searchPromises = [
-    ...words.map((word) => searchIcons(word, 20)),
-    searchIcons(companyName.toLowerCase(), 20),
-  ];
-  const results = await Promise.all(searchPromises);
-  const allIcons = results.flat();
+  // Search Iconify per word + full name
+  const iconifyPromise = (async () => {
+    const searchPromises = [
+      ...words.map((word) => searchIcons(word, 20)),
+      searchIcons(companyName.toLowerCase(), 20),
+    ];
+    const results = await Promise.all(searchPromises);
+    return results.flat();
+  })();
 
-  // Deduplicate by id
+  // Generate AI icons if Freepik key is available
+  const freepikPromise = freepikApiKey
+    ? generateFreepikIcons(companyName, freepikApiKey).catch(() => [] as IconConfig[])
+    : Promise.resolve([] as IconConfig[]);
+
+  const [iconifyIcons, aiIcons] = await Promise.all([iconifyPromise, freepikPromise]);
+
+  // AI icons first, then Iconify results
   const seen = new Set<string>();
-  const unique = allIcons.filter((icon) => {
-    if (seen.has(icon.id)) return false;
+  const unique: IconConfig[] = [];
+
+  for (const icon of [...aiIcons, ...iconifyIcons]) {
+    if (seen.has(icon.id)) continue;
     seen.add(icon.id);
-    return true;
-  });
+    unique.push(icon);
+  }
 
   // If we don't have enough icons, add fallbacks
   if (unique.length < 10) {

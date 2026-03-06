@@ -113,7 +113,7 @@ function pngFilename(size: number): string {
 }
 
 export async function generateFaviconBundle(config: LogoConfig): Promise<FaviconBundle> {
-  const rawSvg = await fetchIconSvg(config.icon.id);
+  const rawSvg = await fetchIconSvg(config.icon.id, config.icon.svg);
   if (!rawSvg) throw new Error('Failed to fetch icon SVG');
 
   const faviconSvg = buildFaviconSvg(rawSvg, config.colors.iconColor);
@@ -228,7 +228,7 @@ export async function renderSocialCard(
   loadFontForPreview(config.font);
 
   // Fetch and prepare icon
-  const rawSvg = await fetchIconSvg(config.icon.id);
+  const rawSvg = await fetchIconSvg(config.icon.id, config.icon.svg);
   if (!rawSvg) throw new Error('Failed to fetch icon SVG');
 
   const iconSvg = buildFaviconSvg(rawSvg, colors.iconColor);

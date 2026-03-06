@@ -32,6 +32,9 @@ export { generateLogos, generateLogosBatch, regenerateWithOverrides } from './ge
 // Icons
 export { searchIcons, fetchIconSvg, colorizeIconSvg, getIconsForCompany } from './icons';
 
+// Freepik AI Icons
+export { generateFreepikIcon, generateFreepikIcons } from './freepik';
+
 // Fonts
 export { CURATED_FONTS, getFontUrl } from './fonts';
 
