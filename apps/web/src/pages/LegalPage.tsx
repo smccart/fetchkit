@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -9,6 +9,12 @@ import { useLegalGenerator } from '@/hooks/useLegalGenerator';
 
 const ALL_DOC_TYPES = Object.keys(LEGAL_DOC_TYPES) as LegalDocType[];
 
+const DEFAULTS: Record<string, string> = {
+  companyName: 'FetchKit',
+  websiteUrl: 'https://fetchkit.dev',
+  contactEmail: 'legal@fetchkit.dev',
+};
+
 const APP_TYPE_OPTIONS = [
   { value: 'website', label: 'Website' },
   { value: 'saas', label: 'SaaS' },
@@ -18,10 +24,11 @@ const APP_TYPE_OPTIONS = [
 
 export default function LegalPage() {
   const { bundle, isGenerating, generate, downloadAll, downloadSingle } = useLegalGenerator();
+  const initialRef = useRef(true);
 
-  const [companyName, setCompanyName] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
+  const [companyName, setCompanyName] = useState(DEFAULTS.companyName);
+  const [websiteUrl, setWebsiteUrl] = useState(DEFAULTS.websiteUrl);
+  const [contactEmail, setContactEmail] = useState(DEFAULTS.contactEmail);
   const [jurisdiction, setJurisdiction] = useState('United States');
   const [appType, setAppType] = useState<LegalInput['appType']>('website');
   const [includeGdpr, setIncludeGdpr] = useState(false);
@@ -30,6 +37,21 @@ export default function LegalPage() {
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   const canGenerate = companyName.trim() && websiteUrl.trim() && contactEmail.trim() && selectedTypes.size > 0;
+
+  // Auto-generate on first mount with FetchKit defaults
+  useEffect(() => {
+    if (!initialRef.current) return;
+    initialRef.current = false;
+    generate(Array.from(selectedTypes), {
+      companyName: DEFAULTS.companyName,
+      websiteUrl: DEFAULTS.websiteUrl,
+      contactEmail: DEFAULTS.contactEmail,
+      jurisdiction: 'United States',
+      appType: 'saas',
+      includeGdpr: false,
+      includeCcpa: false,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGenerate = useCallback(() => {
     if (!canGenerate) return;

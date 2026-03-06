@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -11,18 +11,27 @@ const ALL_ARTIFACT_TYPES = Object.keys(SEO_ARTIFACT_TYPES) as SeoArtifactType[];
 const ALL_JSON_LD_TYPES = Object.keys(JSON_LD_TYPES) as JsonLdType[];
 const DEFAULT_JSON_LD: JsonLdType[] = ['Organization', 'WebSite'];
 
+const DEFAULTS: Record<string, string> = {
+  siteName: 'FetchKit',
+  siteUrl: 'https://fetchkit.dev',
+  description: 'Free scaffolding-as-a-service for developers and AI agents',
+  twitterHandle: '@fetchkit',
+};
+
 const CHANGEFREQ_OPTIONS = ['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'] as const;
 
 export default function SeoPage() {
   const { bundle, isGenerating, generate, downloadAll, downloadSingle } = useSeoGenerator();
 
+  const initialRef = useRef(true);
+
   // Project details
-  const [siteName, setSiteName] = useState('');
-  const [siteUrl, setSiteUrl] = useState('');
+  const [siteName, setSiteName] = useState(DEFAULTS.siteName);
+  const [siteUrl, setSiteUrl] = useState(DEFAULTS.siteUrl);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(DEFAULTS.description);
   const [ogImage, setOgImage] = useState('');
-  const [twitterHandle, setTwitterHandle] = useState('');
+  const [twitterHandle, setTwitterHandle] = useState(DEFAULTS.twitterHandle);
   const [locale, setLocale] = useState('en_US');
 
   // Sitemap pages
@@ -46,6 +55,22 @@ export default function SeoPage() {
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   const canGenerate = siteName.trim() && siteUrl.trim() && selectedArtifacts.size > 0;
+
+  // Auto-generate on first mount with FetchKit defaults
+  useEffect(() => {
+    if (!initialRef.current) return;
+    initialRef.current = false;
+    generate(Array.from(selectedArtifacts), {
+      siteName: DEFAULTS.siteName,
+      siteUrl: DEFAULTS.siteUrl,
+      description: DEFAULTS.description,
+      twitterHandle: DEFAULTS.twitterHandle,
+      locale: 'en_US',
+      pages: [{ path: '/', priority: 1.0, changefreq: 'weekly' }],
+      robotsConfig: { rules: [{ userAgent: '*', allow: ['/'], disallow: ['/admin', '/api'] }] },
+      jsonLdEntities: DEFAULT_JSON_LD.map((type) => ({ type })),
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGenerate = useCallback(() => {
     if (!canGenerate) return;
