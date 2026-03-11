@@ -75,6 +75,16 @@ export function Header() {
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           <Link
+            to="/stats"
+            className={`text-sm font-medium transition-colors ${
+              location.pathname === '/stats'
+                ? 'text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Stats
+          </Link>
+          <Link
             to="/docs"
             className={`text-sm font-medium transition-colors ${
               location.pathname === '/docs'

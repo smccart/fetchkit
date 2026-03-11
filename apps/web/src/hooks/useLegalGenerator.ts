@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { LegalDocType, LegalInput, LegalBundle } from '@fetchkit/legal';
 import { generateBundle } from '@fetchkit/legal';
+import { trackEvent } from '@/hooks/useAnalytics';
 
 interface UseLegalGeneratorReturn {
   bundle: LegalBundle | null;
@@ -21,6 +22,7 @@ export function useLegalGenerator(): UseLegalGeneratorReturn {
       const result = generateBundle(types, input);
       setBundle(result);
       setIsGenerating(false);
+      trackEvent('legal:generate', { docs: types.length });
     }, 0);
   }, []);
 
@@ -41,6 +43,7 @@ export function useLegalGenerator(): UseLegalGeneratorReturn {
     a.download = 'legal-documents.zip';
     a.click();
     URL.revokeObjectURL(url);
+    trackEvent('legal:download', { files: bundle.documents.length * 2 });
   }, [bundle]);
 
   const downloadSingle = useCallback((type: LegalDocType) => {

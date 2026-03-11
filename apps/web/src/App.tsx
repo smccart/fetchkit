@@ -14,6 +14,7 @@ const SeoPage = lazy(() => import('@/pages/SeoPage'));
 const SecurityPage = lazy(() => import('@/pages/SecurityPage'));
 const PalettePage = lazy(() => import('@/pages/PalettePage'));
 const PlaceholdersPage = lazy(() => import('@/pages/PlaceholdersPage'));
+const StatsPage = lazy(() => import('@/pages/StatsPage'));
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/palette" element={<PalettePage />} />
             <Route path="/placeholders" element={<PlaceholdersPage />} />
+            <Route path="/stats" element={<StatsPage />} />
           </Routes>
         </Suspense>
         <Footer />

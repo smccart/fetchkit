@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { SecurityArtifactType, SecurityInput, SecurityBundle } from '@fetchkit/security';
 import { generateBundle } from '@fetchkit/security';
+import { trackEvent } from '@/hooks/useAnalytics';
 
 interface UseSecurityGeneratorReturn {
   bundle: SecurityBundle | null;
@@ -27,6 +28,7 @@ export function useSecurityGenerator(): UseSecurityGeneratorReturn {
       const result = generateBundle(types, input);
       setBundle(result);
       setIsGenerating(false);
+      trackEvent('security:generate', { artifacts: types.length });
     }, 0);
   }, []);
 
@@ -46,6 +48,7 @@ export function useSecurityGenerator(): UseSecurityGeneratorReturn {
     a.download = 'security-config.zip';
     a.click();
     URL.revokeObjectURL(url);
+    trackEvent('security:download');
   }, [bundle]);
 
   const downloadSingle = useCallback((type: SecurityArtifactType) => {

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { SeoArtifactType, SeoInput, SeoBundle } from '@fetchkit/seo';
 import { generateBundle } from '@fetchkit/seo';
+import { trackEvent } from '@/hooks/useAnalytics';
 
 interface UseSeoGeneratorReturn {
   bundle: SeoBundle | null;
@@ -27,6 +28,7 @@ export function useSeoGenerator(): UseSeoGeneratorReturn {
       const result = generateBundle(types, input);
       setBundle(result);
       setIsGenerating(false);
+      trackEvent('seo:generate', { artifacts: types.length });
     }, 0);
   }, []);
 
@@ -46,6 +48,7 @@ export function useSeoGenerator(): UseSeoGeneratorReturn {
     a.download = 'seo-toolkit.zip';
     a.click();
     URL.revokeObjectURL(url);
+    trackEvent('seo:download');
   }, [bundle]);
 
   const downloadSingle = useCallback((type: SeoArtifactType) => {

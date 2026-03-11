@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { LogoVariation, LogoConfig, FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
 import { generateLogos, CURATED_FONTS } from '@fetchkit/brand';
 import { loadAllFonts } from '@/lib/browser';
+import { trackEvent } from '@/hooks/useAnalytics';
 
 interface UseLogoGeneratorReturn {
   companyName: string;
@@ -32,6 +33,7 @@ export function useLogoGenerator(): UseLogoGeneratorReturn {
     try {
       const results = await generateLogos(companyName.trim());
       setVariations(results);
+      trackEvent('brand:generate', { variations: results.length });
     } finally {
       setIsGenerating(false);
     }
