@@ -8,6 +8,8 @@ const TOC = [
   { id: 'brand-service', label: 'Brand Service' },
   { id: 'legal-service', label: 'Legal Service' },
   { id: 'seo-service', label: 'SEO Service' },
+  { id: 'security-service', label: 'Security Service' },
+  { id: 'cli', label: 'CLI' },
   { id: 'architecture', label: 'Architecture' },
   { id: 'api', label: 'REST API' },
   { id: 'mcp', label: 'MCP Server' },
@@ -87,7 +89,7 @@ export default function DocsPage() {
               <li><strong>Brand Kit</strong> — logos, favicons, social cards, design tokens (live now)</li>
               <li><strong>Legal Docs</strong> — privacy policies, terms of service, cookie consent, and more (live now)</li>
               <li><strong>SEO Toolkit</strong> — meta tags, sitemaps, robots.txt, Schema.org structured data (live now)</li>
-              <li><strong>Security</strong> — CSP headers, CORS configs, auth scaffolds (coming soon)</li>
+              <li><strong>Security</strong> — CSP headers, CORS configs, auth scaffolds, rate limiting, env templates (live now)</li>
             </ul>
           </div>
         </div>
@@ -280,6 +282,144 @@ export default function DocsPage() {
         </div>
       </Section>
 
+      {/* Security Service */}
+      <Section id="security-service" title="Security Service" muted>
+        <div className="space-y-6">
+          <p className="text-muted-foreground">
+            The security service generates framework-specific security configurations from your project details.
+            Choose your framework, auth strategy, and app type — get production-ready configs for CSP, CORS,
+            headers, authentication, environment variables, and rate limiting.
+          </p>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">How it works</h3>
+            <ol className="text-muted-foreground space-y-2 list-decimal list-inside">
+              <li>Go to the <Link to="/security" className="text-primary underline underline-offset-4">Security</Link> page and enter your site name and URL</li>
+              <li>Select your framework (Express, Next.js, Fastify, Hono, or generic)</li>
+              <li>Choose an auth strategy (JWT, session, OAuth2, or API key)</li>
+              <li>Select which artifacts to generate — results are created instantly</li>
+              <li>Copy code snippets or download everything as a ZIP</li>
+            </ol>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Artifact types</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left px-4 py-2 font-medium">Artifact</th>
+                    <th className="text-left px-4 py-2 font-medium">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">CSP Header</td>
+                    <td className="px-4 py-2">Content Security Policy with framework-specific integration (helmet, next.config, etc.)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">CORS Config</td>
+                    <td className="px-4 py-2">Cross-origin resource sharing setup with allowed origins, methods, and headers.</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">Security Headers</td>
+                    <td className="px-4 py-2">10+ HTTP security headers (HSTS, X-Frame-Options, X-Content-Type-Options, etc.)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">Auth Scaffold</td>
+                    <td className="px-4 py-2">Authentication boilerplate for JWT, session, OAuth2, or API key strategies.</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-medium text-foreground">Environment Template</td>
+                    <td className="px-4 py-2">.env.example with organized sections (app, database, auth, security, services).</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium text-foreground">Rate Limiter</td>
+                    <td className="px-4 py-2">Rate limiting middleware with configurable window, max requests, and key strategy.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Supported frameworks</h3>
+            <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+              <li><strong>Express</strong> — uses helmet, cors, express-rate-limit</li>
+              <li><strong>Next.js</strong> — uses next.config.js headers, middleware</li>
+              <li><strong>Fastify</strong> — uses @fastify/helmet, @fastify/cors, @fastify/rate-limit</li>
+              <li><strong>Hono</strong> — uses hono/secure-headers, hono/cors</li>
+              <li><strong>Generic</strong> — plain config objects and HTTP header maps</li>
+            </ul>
+          </div>
+        </div>
+      </Section>
+
+      {/* CLI */}
+      <Section id="cli" title="CLI">
+        <div className="space-y-6">
+          <p className="text-muted-foreground">
+            The FetchKit CLI generates a complete project scaffold from the command line.
+            One command gives you brand assets, legal docs, SEO configs, and security headers.
+          </p>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Installation</h3>
+            <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground">
+              <pre>npm install -g @fetchkit/cli</pre>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Usage</h3>
+            <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground overflow-x-auto">
+              <pre>{`# Full scaffold (brand + legal + SEO + security)
+fetchkit scaffold "Acme Corp" --url https://acme.com --email hello@acme.com
+
+# Individual services
+fetchkit brand "Acme Corp" --output ./brand
+fetchkit legal "Acme Corp" --app-type saas --email legal@acme.com
+fetchkit seo "Acme Corp" --url https://acme.com
+fetchkit security "Acme Corp" --framework express --app-type api`}</pre>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Options</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left px-4 py-2 font-medium">Flag</th>
+                    <th className="text-left px-4 py-2 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--output, -o</td>
+                    <td className="px-4 py-2">Output directory (default: ./fetchkit-output)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--url</td>
+                    <td className="px-4 py-2">Site URL (default: https://&lt;name&gt;.com)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--email</td>
+                    <td className="px-4 py-2">Contact email (default: hello@&lt;name&gt;.com)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--framework</td>
+                    <td className="px-4 py-2">express, nextjs, fastify, hono, or generic</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--app-type</td>
+                    <td className="px-4 py-2">website, saas, api, or mobile-backend</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-mono text-xs text-foreground">--auth</td>
+                    <td className="px-4 py-2">jwt, session, oauth2, or api-key</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* Architecture */}
       <Section id="architecture" title="Architecture">
         <div className="space-y-6">
@@ -297,10 +437,13 @@ export default function DocsPage() {
 │   ├── brand/            → @fetchkit/brand (logo, favicon, tokens)
 │   ├── legal/            → @fetchkit/legal (legal document generation)
 │   ├── seo/              → @fetchkit/seo (meta tags, sitemap, JSON-LD)
+│   ├── security/         → @fetchkit/security (CSP, CORS, auth, headers)
+│   ├── cli/              → @fetchkit/cli (command-line scaffolding)
 │   ├── mcp/              → @fetchkit/mcp (MCP server, stdio)
 │   ├── tsconfig/         → shared TypeScript config
 │   └── eslint-config/    → shared ESLint config
 ├── api/                  → Vercel serverless functions (REST API)
+├── .github/              → CI, publish workflow, reusable action
 ├── turbo.json
 └── pnpm-workspace.yaml`}</pre>
             </div>

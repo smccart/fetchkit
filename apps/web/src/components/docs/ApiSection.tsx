@@ -7,7 +7,7 @@ export default function ApiSection() {
     <div className="space-y-10">
       <div className="space-y-3">
         <p className="text-muted-foreground">
-          FetchKit provides a free REST API for programmatic brand asset generation.
+          FetchKit provides a free REST API for programmatic asset generation — brand, legal, SEO, and security.
           No authentication required. No rate limits (for now).
         </p>
         <div className="flex items-center gap-3 flex-wrap">
@@ -356,6 +356,78 @@ const { document } = await res.json();
           fetch={`const res = await fetch("${BASE}/legal/types");
 const { types } = await res.json();
 // types["privacy-policy"] = { title, description }`}
+        />
+      </div>
+
+      {/* Security */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold">Security Configs</h3>
+
+        <EndpointBlock
+          method="POST"
+          path="/security/generate"
+          summary="Generate a single security artifact. Returns framework-specific code for CSP, CORS, headers, auth, env, or rate limiting."
+          params={[
+            { name: 'type', type: 'string', required: true, description: 'csp-header, cors-config, security-headers, auth-scaffold, env-template, or rate-limit' },
+            { name: 'siteName', type: 'string', required: true, description: 'Site or company name' },
+            { name: 'siteUrl', type: 'string', required: true, description: 'Site URL (e.g. https://acme.com)' },
+            { name: 'framework', type: 'string', description: 'express, nextjs, fastify, hono, or generic (default: generic)' },
+            { name: 'appType', type: 'string', description: 'website, saas, api, or mobile-backend (default: website)' },
+            { name: 'authStrategy', type: 'string', description: 'jwt, session, oauth2, or api-key (default: jwt)' },
+          ]}
+          curl={`curl -X POST "${BASE}/security/generate" \\
+-H "Content-Type: application/json" \\
+-d '{
+  "type": "csp-header",
+  "siteName": "Acme Corp",
+  "siteUrl": "https://acme.com",
+  "framework": "express"
+}'`}
+          fetch={`const res = await fetch("${BASE}/security/generate", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+  type: "csp-header",
+  siteName: "Acme Corp",
+  siteUrl: "https://acme.com",
+  framework: "express",
+}),
+});
+const { artifact } = await res.json();
+// artifact.content — framework-specific code to paste into your project
+// artifact.filename — suggested filename (e.g. csp-policy.ts)`}
+        />
+
+        <EndpointBlock
+          method="POST"
+          path="/security/bundle"
+          summary="Generate multiple security artifacts at once. Returns all selected artifacts in one response."
+          params={[
+            { name: 'types', type: 'string[]', required: true, description: 'Array of artifact types to generate' },
+            { name: 'siteName', type: 'string', required: true, description: 'Site or company name' },
+            { name: 'siteUrl', type: 'string', required: true, description: 'Site URL' },
+            { name: 'framework', type: 'string', description: 'Target framework (default: generic)' },
+            { name: 'appType', type: 'string', description: 'App type (default: website)' },
+            { name: 'authStrategy', type: 'string', description: 'Auth strategy (default: jwt)' },
+          ]}
+          curl={`curl -X POST "${BASE}/security/bundle" \\
+-H "Content-Type: application/json" \\
+-d '{
+  "types": ["csp-header", "cors-config", "security-headers", "auth-scaffold", "env-template", "rate-limit"],
+  "siteName": "Acme Corp",
+  "siteUrl": "https://acme.com",
+  "framework": "express"
+}'`}
+        />
+
+        <EndpointBlock
+          method="GET"
+          path="/security/types"
+          summary="List all available security artifact types with descriptions."
+          curl={`curl "${BASE}/security/types"`}
+          fetch={`const res = await fetch("${BASE}/security/types");
+const { types } = await res.json();
+// types["csp-header"] = { title, description }`}
         />
       </div>
     </div>

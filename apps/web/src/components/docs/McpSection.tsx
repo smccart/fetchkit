@@ -96,6 +96,36 @@ export default function McpSection() {
                   description: 'Generate multiple SEO artifacts at once',
                   inputs: 'types[], siteName, siteUrl',
                 },
+                {
+                  name: 'generate_security_artifact',
+                  description: 'Generate a single security config (CSP, CORS, headers, auth, etc.)',
+                  inputs: 'type, siteName, siteUrl, framework',
+                },
+                {
+                  name: 'generate_security_bundle',
+                  description: 'Generate multiple security configs at once',
+                  inputs: 'types[], siteName, siteUrl, framework',
+                },
+                {
+                  name: 'generate_letterhead',
+                  description: 'Generate SVG letterhead with header/footer HTML',
+                  inputs: 'companyName, website, colors, font',
+                },
+                {
+                  name: 'generate_app_icon',
+                  description: 'Generate app icons at standard sizes (16-1024px)',
+                  inputs: 'letter, colors, font',
+                },
+                {
+                  name: 'generate_brand_guidelines',
+                  description: 'Generate comprehensive Markdown brand guidelines',
+                  inputs: 'companyName, colors, font',
+                },
+                {
+                  name: 'generate_email_signature',
+                  description: 'Generate HTML email signature with plain text fallback',
+                  inputs: 'name, title, companyName, email, colors',
+                },
               ].map((tool) => (
                 <tr key={tool.name} className="border-b last:border-0">
                   <td className="px-4 py-2 font-mono text-xs text-foreground whitespace-nowrap">{tool.name}</td>
@@ -151,6 +181,20 @@ export default function McpSection() {
      contactEmail: "legal@nexus.dev"
    })
    → Returns Markdown and HTML for each legal document`}</pre>
+        </div>
+        <p className="text-muted-foreground text-sm mt-4">
+          <strong>Full project scaffold</strong> — brand + legal + SEO + security in one go.
+        </p>
+        <div className="border rounded-lg bg-muted/30 p-4 font-mono text-sm text-muted-foreground overflow-x-auto">
+          <pre>{`1. generate_brand_logos({ companyName: "Nexus", count: 5 })
+2. generate_design_tokens({ colors: ..., font: ... })
+3. generate_favicon({ iconId: "mdi:rocket", iconColor: "#6366f1", companyName: "Nexus" })
+4. generate_letterhead({ companyName: "Nexus", website: "https://nexus.dev", colors: ..., font: ... })
+5. generate_brand_guidelines({ companyName: "Nexus", colors: ..., font: ... })
+6. generate_email_signature({ name: "Founder", companyName: "Nexus", email: "hi@nexus.dev", colors: ... })
+7. generate_legal_bundle({ types: ["privacy-policy", "terms-of-service"], ... })
+8. generate_seo_bundle({ types: ["meta-tags", "sitemap", "robots-txt", "json-ld"], ... })
+9. generate_security_bundle({ types: ["csp-header", "cors-config", "security-headers", "auth-scaffold"], ... })`}</pre>
         </div>
       </div>
     </div>
