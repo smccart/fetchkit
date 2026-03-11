@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Palette, Scale, Search, Shield, Zap, Code, UserX, Github, Layers, Package } from 'lucide-react';
 import { useSiteColor } from '@/hooks/useSiteColor';
+import { getAnalyticsStats } from '@/hooks/useAnalytics';
 
 const SERVICES = [
   {
@@ -43,8 +45,23 @@ const FEATURES = [
   { icon: Package, title: 'Composable Packages', desc: 'Each service is a standalone npm package. Use what you need, skip what you don\'t.' },
 ];
 
+const SERVICE_COLORS: Record<string, string> = {
+  brand: '#6366f1',
+  legal: '#f59e0b',
+  seo: '#10b981',
+  security: '#ef4444',
+  palette: '#8b5cf6',
+  placeholder: '#06b6d4',
+};
+
 export default function HomePage() {
   const { color, secondaryColor } = useSiteColor();
+  const [stats, setStats] = useState<{ total: number; byService: Record<string, number> } | null>(null);
+
+  useEffect(() => {
+    const s = getAnalyticsStats();
+    if (s.totalEvents > 0) setStats({ total: s.totalEvents, byService: s.byService });
+  }, []);
 
   return (
     <div className="flex-1">
@@ -140,6 +157,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stats Strip */}
+      {stats && stats.total > 0 && (
+        <section className="py-12 px-6 bg-card/30">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Your Activity</h2>
+              <Link
+                to="/stats"
+                className="text-sm font-medium transition-colors hover:text-foreground"
+                style={{ color }}
+              >
+                View all stats &rarr;
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="border rounded-xl p-4 bg-background/50">
+                <p className="text-2xl font-bold" style={{ color }}>{stats.total}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Total Events</p>
+              </div>
+              {Object.entries(stats.byService)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 3)
+                .map(([service, count]) => (
+                  <div key={service} className="border rounded-xl p-4 bg-background/50">
+                    <p className="text-2xl font-bold" style={{ color: SERVICE_COLORS[service] || secondaryColor }}>
+                      {count}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 capitalize">{service}</p>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
       <section
         className="py-16 px-6"
@@ -148,7 +200,7 @@ export default function HomePage() {
         <div className="container mx-auto text-center space-y-4">
           <h2 className="text-3xl font-bold">Ready to scaffold your project?</h2>
           <p className="text-muted-foreground">
-            Start with a brand kit. More services coming soon.
+            All services are live. Brand, legal, SEO, and security — one toolkit.
           </p>
           <Button asChild size="lg">
             <Link to="/create">Create Brand Kit</Link>
