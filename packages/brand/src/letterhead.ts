@@ -43,7 +43,6 @@ export function generateLetterhead(config: LetterheadConfig): LetterheadResult {
     iconSvg,
   } = config;
   const primary = colors.primary;
-  const secondary = colors.secondary || colors.primary;
   const textColor = colors.text || '#333333';
 
   // SVG letterhead template (US Letter: 8.5" x 11" at 96 DPI = 816 x 1056)

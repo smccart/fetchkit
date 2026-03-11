@@ -1,7 +1,11 @@
 {
   "name": "@fetchkit/security",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Security config generator — CSP headers, CORS, auth scaffolds, rate limiting, and more.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/smccart/fetchkit", "directory": "packages/security" },
+  "homepage": "https://fetchkit.dev",
+  "keywords": ["security", "csp", "cors", "authentication", "rate-limiting", "scaffolding"],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

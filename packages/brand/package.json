@@ -1,7 +1,11 @@
 {
   "name": "@fetchkit/brand",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Brand identity generator — logos, favicons, palettes, design tokens, letterheads, and more.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/smccart/fetchkit", "directory": "packages/brand" },
+  "homepage": "https://fetchkit.dev",
+  "keywords": ["brand", "logo", "favicon", "design-tokens", "palette", "scaffolding"],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

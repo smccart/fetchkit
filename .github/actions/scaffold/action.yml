@@ -1,0 +1,95 @@
+name: FetchKit Scaffold
+description: Generate brand, legal, SEO, and security assets for your project using FetchKit.
+author: Sean McCart
+
+branding:
+  icon: package
+  color: purple
+
+inputs:
+  name:
+    description: Project or company name
+    required: true
+  url:
+    description: Site URL (default derived from name)
+    required: false
+  email:
+    description: Contact email (default derived from name)
+    required: false
+  services:
+    description: Comma-separated list of services to run (brand,legal,seo,security or "all")
+    required: false
+    default: all
+  framework:
+    description: Target framework (express, nextjs, fastify, hono, generic)
+    required: false
+    default: generic
+  app-type:
+    description: App type (website, saas, api, mobile-backend)
+    required: false
+    default: website
+  auth-strategy:
+    description: Auth strategy (jwt, session, oauth2, api-key)
+    required: false
+    default: jwt
+  output-dir:
+    description: Output directory for generated files
+    required: false
+    default: ./fetchkit-output
+
+outputs:
+  output-dir:
+    description: Path to the generated output directory
+    value: ${{ inputs.output-dir }}
+  file-count:
+    description: Number of files generated
+    value: ${{ steps.scaffold.outputs.file-count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install FetchKit CLI
+      shell: bash
+      run: npm install -g @fetchkit/cli@latest
+
+    - name: Run scaffold
+      id: scaffold
+      shell: bash
+      env:
+        FK_NAME: ${{ inputs.name }}
+        FK_URL: ${{ inputs.url }}
+        FK_EMAIL: ${{ inputs.email }}
+        FK_SERVICES: ${{ inputs.services }}
+        FK_FRAMEWORK: ${{ inputs.framework }}
+        FK_APP_TYPE: ${{ inputs.app-type }}
+        FK_AUTH: ${{ inputs.auth-strategy }}
+        FK_OUTPUT: ${{ inputs.output-dir }}
+      run: |
+        ARGS="--output $FK_OUTPUT --framework $FK_FRAMEWORK --app-type $FK_APP_TYPE --auth $FK_AUTH"
+
+        if [ -n "$FK_URL" ]; then
+          ARGS="$ARGS --url $FK_URL"
+        fi
+
+        if [ -n "$FK_EMAIL" ]; then
+          ARGS="$ARGS --email $FK_EMAIL"
+        fi
+
+        if [ "$FK_SERVICES" = "all" ]; then
+          fetchkit scaffold "$FK_NAME" $ARGS
+        else
+          IFS=',' read -ra SERVICES <<< "$FK_SERVICES"
+          for svc in "${SERVICES[@]}"; do
+            svc=$(echo "$svc" | xargs)
+            fetchkit "$svc" "$FK_NAME" $ARGS
+          done
+        fi
+
+        FILE_COUNT=$(find "$FK_OUTPUT" -type f | wc -l | xargs)
+        echo "file-count=$FILE_COUNT" >> "$GITHUB_OUTPUT"
+        echo "Generated $FILE_COUNT files in $FK_OUTPUT"

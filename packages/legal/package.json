@@ -1,7 +1,11 @@
 {
   "name": "@fetchkit/legal",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Legal document generator — privacy policies, terms of service, cookie consent, and more.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/smccart/fetchkit", "directory": "packages/legal" },
+  "homepage": "https://fetchkit.dev",
+  "keywords": ["legal", "privacy-policy", "terms-of-service", "cookie-consent", "scaffolding"],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

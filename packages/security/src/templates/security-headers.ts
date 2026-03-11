@@ -8,7 +8,6 @@ interface HeaderEntry {
 
 function getHeaders(input: SecurityInput): HeaderEntry[] {
   const appType = input.appType || 'website';
-  const url = input.siteUrl.replace(/\/$/, '');
 
   const headers: HeaderEntry[] = [
     {

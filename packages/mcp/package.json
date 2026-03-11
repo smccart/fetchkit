@@ -1,6 +1,12 @@
 {
   "name": "@fetchkit/mcp",
   "version": "0.1.0",
+  "description": "MCP server for FetchKit — 17 tools for brand, legal, SEO, and security scaffolding.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/smccart/fetchkit", "directory": "packages/mcp" },
+  "homepage": "https://fetchkit.dev",
+  "keywords": ["mcp", "model-context-protocol", "ai-agent", "scaffolding"],
+  "files": ["dist"],
   "type": "module",
   "bin": {
     "fetchkit-mcp": "./dist/index.js"
