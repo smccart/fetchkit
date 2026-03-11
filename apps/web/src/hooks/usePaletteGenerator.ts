@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { ColorHarmony, SemanticPalette, PaletteExport } from '@fetchkit/brand';
-import { generateSemanticPalette, bundlePaletteExport } from '@fetchkit/brand';
+import { generateSemanticPalette, generatePaletteFromName, bundlePaletteExport } from '@fetchkit/brand';
 
 interface UsePaletteGeneratorReturn {
   seedColor: string;
@@ -10,7 +10,13 @@ interface UsePaletteGeneratorReturn {
   palette: SemanticPalette;
   exportData: PaletteExport;
   downloadZip: () => Promise<void>;
+  generateFromName: (name: string) => void;
+  randomize: () => void;
 }
+
+const HARMONIES: ColorHarmony[] = [
+  'analogous', 'complementary', 'triadic', 'split-complementary', 'monochromatic',
+];
 
 export function usePaletteGenerator(
   initialSeed: string = '#6366f1',
@@ -27,6 +33,30 @@ export function usePaletteGenerator(
     () => bundlePaletteExport(palette),
     [palette],
   );
+
+  const generateFromName = useCallback((name: string) => {
+    const result = generatePaletteFromName(name);
+    setSeedColor(result.seedColor);
+    setHarmony(result.harmony);
+  }, []);
+
+  const randomize = useCallback(() => {
+    const hue = Math.floor(Math.random() * 360);
+    const sat = 50 + Math.floor(Math.random() * 40);
+    const lit = 35 + Math.floor(Math.random() * 25);
+    // Convert HSL to hex for the seed color
+    const h = hue / 360;
+    const s = sat / 100;
+    const l = lit / 100;
+    const a2 = s * Math.min(l, 1 - l);
+    const f = (n: number) => {
+      const k = (n + h * 12) % 12;
+      const c = l - a2 * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * c).toString(16).padStart(2, '0');
+    };
+    setSeedColor(`#${f(0)}${f(8)}${f(4)}`);
+    setHarmony(HARMONIES[Math.floor(Math.random() * HARMONIES.length)]);
+  }, []);
 
   const downloadZip = useCallback(async () => {
     if (!exportData) return;
@@ -61,5 +91,7 @@ export function usePaletteGenerator(
     palette,
     exportData,
     downloadZip,
+    generateFromName,
+    randomize,
   };
 }

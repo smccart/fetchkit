@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
+import { Shuffle } from 'lucide-react';
 import type { ColorHarmony, SemanticPalette, WcagLevel } from '@fetchkit/brand';
 
 interface PalettePanelProps {
@@ -8,6 +9,7 @@ interface PalettePanelProps {
   harmony: ColorHarmony;
   onHarmonyChange: (h: ColorHarmony) => void;
   palette: SemanticPalette;
+  onRandomize: () => void;
 }
 
 const HARMONIES: { value: ColorHarmony; label: string }[] = [
@@ -20,15 +22,35 @@ const HARMONIES: { value: ColorHarmony; label: string }[] = [
 
 const SHADE_KEYS = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 
-function ContrastBadge({ level }: { level: WcagLevel }) {
+function ContrastBadge({ level, ratio }: { level: WcagLevel; ratio: number }) {
   const bg =
     level === 'AAA' ? 'bg-green-100 text-green-800' :
     level === 'AA' ? 'bg-yellow-100 text-yellow-800' :
     'bg-red-100 text-red-800';
   return (
     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${bg}`}>
-      {level}
+      {level} {ratio.toFixed(1)}:1
     </span>
+  );
+}
+
+function CopyHex({ hex, className }: { hex: string; className?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(hex);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  }, [hex]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={`font-mono cursor-pointer hover:underline transition-colors ${className ?? ''}`}
+      title="Click to copy"
+    >
+      {copied ? 'Copied!' : hex}
+    </button>
   );
 }
 
@@ -38,8 +60,16 @@ export function PalettePanel({
   harmony,
   onHarmonyChange,
   palette,
+  onRandomize,
 }: PalettePanelProps) {
   const [darkMode, setDarkMode] = useState(false);
+  const [copiedShade, setCopiedShade] = useState<string | null>(null);
+
+  const copyShade = useCallback(async (hex: string, key: string) => {
+    await navigator.clipboard.writeText(hex);
+    setCopiedShade(key);
+    setTimeout(() => setCopiedShade(null), 1200);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -59,6 +89,13 @@ export function PalettePanel({
               onChange={(e) => onSeedColorChange(e.target.value)}
               className="w-28 font-mono text-sm"
             />
+            <button
+              onClick={onRandomize}
+              className="h-9 px-2.5 rounded-md border border-border hover:border-foreground transition-colors text-muted-foreground hover:text-foreground"
+              title="Randomize"
+            >
+              <Shuffle className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
@@ -100,40 +137,49 @@ export function PalettePanel({
               darkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-border'
             }`}
           >
-            {Object.entries(palette.colors).map(([name, color]) => (
-              <div key={name} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-5 h-5 rounded-full border border-black/10"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  <span className={`text-sm font-medium capitalize ${darkMode ? 'text-zinc-200' : ''}`}>
-                    {name}
-                  </span>
-                  <span className={`text-xs font-mono ${darkMode ? 'text-zinc-500' : 'text-muted-foreground'}`}>
-                    {color.hex}
-                  </span>
-                  <ContrastBadge level={darkMode ? color.contrastOnBlack.levelNormal : color.contrastOnWhite.levelNormal} />
-                </div>
-                <p className={`text-xs ${darkMode ? 'text-zinc-500' : 'text-muted-foreground'}`}>
-                  {color.role}
-                </p>
-                <div className="flex gap-0.5 rounded-lg overflow-hidden">
-                  {SHADE_KEYS.map((shade) => (
+            {Object.entries(palette.colors).map(([name, color]) => {
+              const contrast = darkMode ? color.contrastOnBlack : color.contrastOnWhite;
+              return (
+                <div key={name} className="space-y-2">
+                  <div className="flex items-center gap-2">
                     <div
-                      key={shade}
-                      className="flex-1 h-8 group relative"
-                      style={{ backgroundColor: color.shades[shade] }}
-                      title={`${shade}: ${color.shades[shade]}`}
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono opacity-0 group-hover:opacity-100 transition-opacity mix-blend-difference text-white">
-                        {shade}
-                      </span>
-                    </div>
-                  ))}
+                      className="w-5 h-5 rounded-full border border-black/10"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <span className={`text-sm font-medium capitalize ${darkMode ? 'text-zinc-200' : ''}`}>
+                      {name}
+                    </span>
+                    <CopyHex
+                      hex={color.hex}
+                      className={`text-xs ${darkMode ? 'text-zinc-500' : 'text-muted-foreground'}`}
+                    />
+                    <ContrastBadge level={contrast.levelNormal} ratio={contrast.ratio} />
+                  </div>
+                  <p className={`text-xs ${darkMode ? 'text-zinc-500' : 'text-muted-foreground'}`}>
+                    {color.role}
+                  </p>
+                  <div className="flex gap-0.5 rounded-lg overflow-hidden">
+                    {SHADE_KEYS.map((shade) => {
+                      const shadeHex = color.shades[shade];
+                      const shadeKey = `${name}-${shade}`;
+                      return (
+                        <button
+                          key={shade}
+                          className="flex-1 h-8 group relative cursor-pointer"
+                          style={{ backgroundColor: shadeHex }}
+                          title={`${shade}: ${shadeHex} — click to copy`}
+                          onClick={() => copyShade(shadeHex, shadeKey)}
+                        >
+                          <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono opacity-0 group-hover:opacity-100 transition-opacity mix-blend-difference text-white">
+                            {copiedShade === shadeKey ? '✓' : shade}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
     </div>

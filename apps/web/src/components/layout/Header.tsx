@@ -48,6 +48,7 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider hidden lg:inline">Brand Colors</span>
             <label className="relative cursor-pointer group" title="Primary brand color">
               <input
                 type="color"
