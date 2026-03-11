@@ -1,8 +1,10 @@
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { usePlaceholders } from '@/hooks/usePlaceholders';
 import { useSiteColor } from '@/hooks/useSiteColor';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function PlaceholdersPage() {
+  usePageTitle('Placeholders');
   const { color, secondaryColor } = useSiteColor();
   const placeholders = usePlaceholders(color, secondaryColor);
 

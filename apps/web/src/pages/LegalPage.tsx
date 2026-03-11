@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Scale, Download, Copy, Check, Loader2 } from 'lucide-react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { LEGAL_DOC_TYPES } from '@fetchkit/legal';
 import type { LegalDocType, LegalInput } from '@fetchkit/legal';
 import { useLegalGenerator } from '@/hooks/useLegalGenerator';
@@ -23,6 +24,7 @@ const APP_TYPE_OPTIONS = [
 ] as const;
 
 export default function LegalPage() {
+  usePageTitle('Legal Docs');
   const { bundle, isGenerating, generate, downloadAll, downloadSingle } = useLegalGenerator();
   const initialRef = useRef(true);
 

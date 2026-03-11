@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import ApiSection from '@/components/docs/ApiSection';
 import McpSection from '@/components/docs/McpSection';
@@ -38,6 +39,7 @@ function Section({
 }
 
 export default function DocsPage() {
+  usePageTitle('Documentation');
   return (
     <div className="flex-1">
       {/* Header */}

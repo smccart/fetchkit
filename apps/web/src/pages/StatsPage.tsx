@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSiteColor } from '@/hooks/useSiteColor';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { getAnalyticsStats, type AnalyticsStats } from '@/hooks/useAnalytics';
 
 const SERVICE_META: Record<string, { label: string; color: string }> = {
@@ -205,6 +206,7 @@ function EmptyState({ color }: { color: string }) {
 }
 
 export default function StatsPage() {
+  usePageTitle('Stats');
   const { color, secondaryColor } = useSiteColor();
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
 

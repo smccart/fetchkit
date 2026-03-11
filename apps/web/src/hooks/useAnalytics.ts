@@ -11,7 +11,9 @@ export type AnalyticsEvent =
   | 'security:generate'
   | 'security:download'
   | 'palette:generate'
-  | 'placeholder:generate';
+  | 'placeholder:generate'
+  | 'generate-all:generate'
+  | 'generate-all:download';
 
 export interface AnalyticsEntry {
   event: AnalyticsEvent;

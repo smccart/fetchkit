@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Shield, Download, Copy, Check, Loader2 } from 'lucide-react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { SECURITY_ARTIFACT_TYPES, APP_FRAMEWORKS, AUTH_STRATEGIES } from '@fetchkit/security';
 import type { SecurityArtifactType, AppFramework, AuthStrategy, SecurityInput } from '@fetchkit/security';
 import { useSecurityGenerator } from '@/hooks/useSecurityGenerator';
@@ -17,6 +18,7 @@ const DEFAULTS: Record<string, string> = {
 };
 
 export default function SecurityPage() {
+  usePageTitle('Security Config');
   const { bundle, isGenerating, generate, downloadAll, downloadSingle } = useSecurityGenerator();
 
   const initialRef = useRef(true);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { PalettePanel } from '@/components/PalettePanel';
 import { PaletteExportPanel } from '@/components/PaletteExportPanel';
 import { usePaletteGenerator } from '@/hooks/usePaletteGenerator';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Pipette, Sparkles } from 'lucide-react';
 
 export default function PalettePage() {
+  usePageTitle('Color Palette');
   const [searchParams] = useSearchParams();
   const initialSeed = searchParams.get('seed') || '#6366f1';
   const paletteGen = usePaletteGenerator(initialSeed);

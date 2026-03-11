@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SiteColorProvider } from '@/hooks/useSiteColor';
@@ -15,6 +16,7 @@ const SecurityPage = lazy(() => import('@/pages/SecurityPage'));
 const PalettePage = lazy(() => import('@/pages/PalettePage'));
 const PlaceholdersPage = lazy(() => import('@/pages/PlaceholdersPage'));
 const StatsPage = lazy(() => import('@/pages/StatsPage'));
+const GenerateAllPage = lazy(() => import('@/pages/GenerateAllPage'));
 
 export default function App() {
   return (
@@ -42,9 +44,11 @@ export default function App() {
             <Route path="/palette" element={<PalettePage />} />
             <Route path="/placeholders" element={<PlaceholdersPage />} />
             <Route path="/stats" element={<StatsPage />} />
+            <Route path="/generate" element={<GenerateAllPage />} />
           </Routes>
         </Suspense>
         <Footer />
+        <Toaster position="bottom-right" richColors />
       </div>
     </BrowserRouter>
     </SiteColorProvider>

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Search, Download, Copy, Check, Loader2, Plus, Trash2, ChevronDown } from 'lucide-react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { SEO_ARTIFACT_TYPES, JSON_LD_TYPES } from '@fetchkit/seo';
 import type { SeoArtifactType, SeoInput, SitemapPage, RobotsRule, JsonLdType, JsonLdEntity } from '@fetchkit/seo';
 import { useSeoGenerator } from '@/hooks/useSeoGenerator';
@@ -21,6 +22,7 @@ const DEFAULTS: Record<string, string> = {
 const CHANGEFREQ_OPTIONS = ['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'] as const;
 
 export default function SeoPage() {
+  usePageTitle('SEO Toolkit');
   const { bundle, isGenerating, generate, downloadAll, downloadSingle } = useSeoGenerator();
 
   const initialRef = useRef(true);

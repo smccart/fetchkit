@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import {
   Palette, Scale, Search, Shield, Zap, Code, UserX,
@@ -53,6 +54,14 @@ const STEPS = [
   { icon: Copy, title: 'Copy & ship', desc: 'Download files, copy code, or call the API from your agent.' },
 ];
 
+const EXAMPLES = [
+  { name: 'Acme Corp', domain: 'acme.com', url: 'https://acme.com', color: '#6366f1' },
+  { name: 'NovaPay', domain: 'novapay.io', url: 'https://novapay.io', color: '#10b981' },
+  { name: 'GreenLeaf', domain: 'greenleaf.eco', url: 'https://greenleaf.eco', color: '#22c55e' },
+  { name: 'CloudSync', domain: 'cloudsync.dev', url: 'https://cloudsync.dev', color: '#3b82f6' },
+  { name: 'FireBolt', domain: 'firebolt.app', url: 'https://firebolt.app', color: '#ef4444' },
+];
+
 const FEATURES = [
   { icon: Zap, title: 'Agent-Callable API', desc: 'REST endpoints and MCP server so AI agents can request assets programmatically.' },
   { icon: Code, title: 'Developer-Friendly', desc: 'Outputs designed for copy-paste: SVGs, CSS variables, Tailwind configs, JSON tokens.' },
@@ -63,6 +72,7 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
+  usePageTitle('');
   const { color, secondaryColor } = useSiteColor();
   const [stats, setStats] = useState<{ total: number; byService: Record<string, number> } | null>(null);
 
@@ -92,10 +102,10 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <Link to="/create">Get Started</Link>
+                  <Link to="/generate">Generate Everything</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/docs">Read the Docs</Link>
+                  <Link to="/create">Brand Kit</Link>
                 </Button>
                 <Button asChild variant="ghost" size="lg">
                   <a
@@ -201,8 +211,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Examples */}
       <section className="py-16 px-6 bg-card/30">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold text-center mb-3">See it in action</h2>
+          <p className="text-center text-muted-foreground mb-10">
+            Click any example to generate a full scaffold instantly.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {EXAMPLES.map((ex) => (
+              <Link
+                key={ex.name}
+                to={`/generate?name=${encodeURIComponent(ex.name)}&url=${encodeURIComponent(ex.url)}`}
+                className="group border rounded-xl p-4 bg-card/50 hover:shadow-md hover:border-border/80 transition-all text-center block"
+              >
+                <div
+                  className="h-10 w-10 rounded-lg mx-auto mb-3 flex items-center justify-center text-lg font-bold transition-transform group-hover:scale-110"
+                  style={{ backgroundColor: `${ex.color}1a`, color: ex.color }}
+                >
+                  {ex.name[0]}
+                </div>
+                <p className="text-sm font-medium truncate">{ex.name}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{ex.domain}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 px-6">
         <div className="container mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold text-center mb-12">Built for Agents & Developers</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -272,7 +310,7 @@ export default function HomePage() {
           </p>
           <div className="flex justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/create">Create Brand Kit</Link>
+              <Link to="/generate">Generate Everything</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link to="/docs">Explore the API</Link>

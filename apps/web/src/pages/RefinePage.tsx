@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LogoGrid } from '@/components/LogoGrid';
@@ -14,6 +15,7 @@ import type { FontConfig, IconConfig, ColorPalette } from '@fetchkit/brand';
 const DEFAULT_NAME = 'FetchKit';
 
 export default function RefinePage() {
+  usePageTitle('Brand Kit');
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState(DEFAULT_NAME);
   const { color: accentColor, secondaryColor } = useSiteColor();
